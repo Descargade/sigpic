@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Trash2, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -6,10 +7,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getDb, saveDatabase } from '@/db'
-import { userProfileTable, skillsTable } from '@/db/schema'
-import { sql } from 'drizzle-orm'
-import { mapUserProfile, mapSkill } from '@/db/mappers'
+import { profileApi } from '@/api/profile'
+import { skillsApi } from '@/api/skills'
 import type { SkillLevel, UserProfile, Skill } from '@/types'
 
 const skillLevels: SkillLevel[] = ['basico', 'intermedio', 'avanzado']
@@ -20,78 +19,69 @@ const levelColors: Record<SkillLevel, 'default' | 'secondary' | 'accent'> = {
 }
 
 export function Profile() {
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [skills, setSkills] = useState<Skill[]>([])
-  const [newSkill, setNewSkill] = useState({ name: '', level: 'intermedio' as SkillLevel, category: '' })
+  const queryClient = useQueryClient()
   const [saved, setSaved] = useState(false)
+  const [newSkill, setNewSkill] = useState({ name: '', level: 'intermedio' as SkillLevel, category: '' })
 
-  useEffect(() => {
-    loadProfile()
-    loadSkills()
-  }, [])
+  // Queries
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: profileApi.get,
+  })
 
-  function loadProfile() {
-    const db = getDb()
-    const result = db.select().from(userProfileTable).get()
-    if (result) {
-      setProfile(mapUserProfile(result))
-    }
-  }
+  const { data: skills = [] } = useQuery({
+    queryKey: ['skills'],
+    queryFn: skillsApi.getAll,
+  })
 
-  function loadSkills() {
-    const db = getDb()
-    const results = db.select().from(skillsTable).all()
-    setSkills(results.map(mapSkill))
-  }
+  // Mutations
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: Partial<UserProfile>) => profileApi.update(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    },
+  })
+
+  const addSkillMutation = useMutation({
+    mutationFn: (skill: Omit<Skill, 'id'>) => skillsApi.create(skill),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['skills'] })
+      setNewSkill({ name: '', level: 'intermedio', category: '' })
+    },
+  })
+
+  const updateSkillMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<Skill> }) => skillsApi.update(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['skills'] }),
+  })
+
+  const deleteSkillMutation = useMutation({
+    mutationFn: (id: number) => skillsApi.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['skills'] }),
+  })
 
   function saveProfile() {
     if (!profile) return
-    const db = getDb()
-    db.update(userProfileTable)
-      .set({
-        name: profile.name,
-        brand: profile.brand,
-        description: profile.description,
-        experience: profile.experience,
-        languages: JSON.stringify(profile.languages),
-        availability: profile.availability,
-        hoursPerWeek: profile.hoursPerWeek,
-        preferredJobTypes: JSON.stringify(profile.preferredJobTypes),
-        avoidedJobTypes: JSON.stringify(profile.avoidedJobTypes),
-        updatedAt: new Date(),
-      })
-      .where(sql`id = 1`)
-      .run()
-    saveDatabase()
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    updateProfileMutation.mutate(profile)
   }
 
   function addSkill() {
     if (!newSkill.name.trim() || !newSkill.category.trim()) return
-    const db = getDb()
-    db.insert(skillsTable).values({
+    addSkillMutation.mutate({
       name: newSkill.name.trim(),
       level: newSkill.level,
       category: newSkill.category.trim(),
-    }).run()
-    saveDatabase()
-    setNewSkill({ name: '', level: 'intermedio', category: '' })
-    loadSkills()
-  }
-
-  function removeSkill(id: number) {
-    const db = getDb()
-    db.delete(skillsTable).where(sql`id = ${id}`).run()
-    saveDatabase()
-    loadSkills()
+    })
   }
 
   function updateSkillLevel(id: number, level: SkillLevel) {
-    const db = getDb()
-    db.update(skillsTable).set({ level }).where(sql`id = ${id}`).run()
-    saveDatabase()
-    loadSkills()
+    updateSkillMutation.mutate({ id, data: { level } })
+  }
+
+  function removeSkill(id: number) {
+    deleteSkillMutation.mutate(id)
   }
 
   const groupedSkills = skills.reduce(
@@ -103,7 +93,21 @@ export function Profile() {
     {} as Record<string, Skill[]>
   )
 
-  if (!profile) return null
+  if (profileLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <p className="text-muted-foreground">No se pudo cargar el perfil</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -123,7 +127,7 @@ export function Profile() {
               <Input
                 id="name"
                 value={profile.name}
-                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                onChange={(e) => updateProfileMutation.mutate({ ...profile, name: e.target.value })}
                 placeholder="Tu nombre"
               />
             </div>
@@ -132,7 +136,7 @@ export function Profile() {
               <Input
                 id="brand"
                 value={profile.brand}
-                onChange={(e) => setProfile({ ...profile, brand: e.target.value })}
+                onChange={(e) => updateProfileMutation.mutate({ ...profile, brand: e.target.value })}
                 placeholder="Tu marca personal"
               />
             </div>
@@ -143,7 +147,7 @@ export function Profile() {
             <Textarea
               id="description"
               value={profile.description}
-              onChange={(e) => setProfile({ ...profile, description: e.target.value })}
+              onChange={(e) => updateProfileMutation.mutate({ ...profile, description: e.target.value })}
               placeholder="Describe tu experiencia y especialidad..."
               rows={3}
             />
@@ -154,7 +158,7 @@ export function Profile() {
             <Textarea
               id="experience"
               value={profile.experience}
-              onChange={(e) => setProfile({ ...profile, experience: e.target.value })}
+              onChange={(e) => updateProfileMutation.mutate({ ...profile, experience: e.target.value })}
               placeholder="Describe tu experiencia laboral..."
               rows={3}
             />
@@ -166,7 +170,7 @@ export function Profile() {
               <Input
                 id="languages"
                 value={profile.languages.join(', ')}
-                onChange={(e) => setProfile({ ...profile, languages: e.target.value.split(',').map((l) => l.trim()).filter(Boolean) })}
+                onChange={(e) => updateProfileMutation.mutate({ ...profile, languages: e.target.value.split(',').map((l) => l.trim()).filter(Boolean) })}
                 placeholder="Español, Inglés"
               />
             </div>
@@ -175,7 +179,7 @@ export function Profile() {
               <Input
                 id="availability"
                 value={profile.availability}
-                onChange={(e) => setProfile({ ...profile, availability: e.target.value })}
+                onChange={(e) => updateProfileMutation.mutate({ ...profile, availability: e.target.value })}
                 placeholder="Tiempo completo, Medio tiempo..."
               />
             </div>
@@ -188,7 +192,7 @@ export function Profile() {
                 id="hoursPerWeek"
                 type="number"
                 value={profile.hoursPerWeek}
-                onChange={(e) => setProfile({ ...profile, hoursPerWeek: parseInt(e.target.value) || 0 })}
+                onChange={(e) => updateProfileMutation.mutate({ ...profile, hoursPerWeek: parseInt(e.target.value) || 0 })}
               />
             </div>
           </div>
@@ -198,7 +202,7 @@ export function Profile() {
             <Input
               id="preferredJobTypes"
               value={profile.preferredJobTypes.join(', ')}
-              onChange={(e) => setProfile({ ...profile, preferredJobTypes: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+              onChange={(e) => updateProfileMutation.mutate({ ...profile, preferredJobTypes: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
               placeholder="Frontend, Full Stack, SaaS"
             />
           </div>
@@ -208,15 +212,15 @@ export function Profile() {
             <Input
               id="avoidedJobTypes"
               value={profile.avoidedJobTypes.join(', ')}
-              onChange={(e) => setProfile({ ...profile, avoidedJobTypes: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+              onChange={(e) => updateProfileMutation.mutate({ ...profile, avoidedJobTypes: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
               placeholder="WordPress, PHP"
             />
           </div>
 
           <div className="flex justify-end">
-            <Button onClick={saveProfile}>
+            <Button onClick={saveProfile} disabled={updateProfileMutation.isPending}>
               <Save className="h-4 w-4" />
-              {saved ? 'Guardado!' : 'Guardar perfil'}
+              {saved ? 'Guardado!' : updateProfileMutation.isPending ? 'Guardando...' : 'Guardar perfil'}
             </Button>
           </div>
         </CardContent>
@@ -249,7 +253,7 @@ export function Profile() {
               placeholder="Categoría"
               className="w-32"
             />
-            <Button onClick={addSkill}>
+            <Button onClick={addSkill} disabled={addSkillMutation.isPending}>
               Agregar
             </Button>
           </div>

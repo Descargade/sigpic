@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Router, Route, Switch } from 'wouter'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppLayout } from '@/components/layout/app-layout'
@@ -20,36 +20,10 @@ const queryClient = new QueryClient({
 })
 
 function App() {
-  const [ready, setReady] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
   useEffect(() => {
-    initDatabase()
-      .then(() => setReady(true))
-      .catch((err) => setError(err.message))
+    // Inicializar sql.js en background (para páginas no migradas aún)
+    initDatabase().catch(() => {})
   }, [])
-
-  if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="text-xl font-bold text-destructive">Error al iniciar</h1>
-          <p className="mt-2 text-muted-foreground">{error}</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="mt-4 text-muted-foreground">Cargando 2bleA Job Hunter...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <QueryClientProvider client={queryClient}>
