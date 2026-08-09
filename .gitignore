@@ -21,3 +21,9 @@ pnpm-debug.log*
 # Vite
 vite.config.ts.tmp
 vite.config.ts.timestamp-*
+
+# Vercel
+.vercel
+
+# Drizzle
+drizzle/meta

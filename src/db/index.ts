@@ -6,14 +6,11 @@ let db: SQLJsDatabase<typeof schema> | null = null
 let sqlDb: Database | null = null
 
 const DB_STORAGE_KEY = '2blea-db-backup'
-const WASM_PATH = '/wasm/sql-wasm.wasm'
 
 export async function initDatabase(): Promise<SQLJsDatabase<typeof schema>> {
   if (db) return db
 
-  const SQL = await initSqlJs({
-    locateFile: () => WASM_PATH,
-  })
+  const SQL = await initSqlJs()
 
   const savedData = localStorage.getItem(DB_STORAGE_KEY)
   if (savedData) {
@@ -315,9 +312,7 @@ export function exportBackup(): string {
 
 export async function importBackup(base64Data: string): Promise<void> {
   const buffer = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0))
-  const SQL = await initSqlJs({
-    locateFile: () => WASM_PATH,
-  })
+  const SQL = await initSqlJs()
   sqlDb = new SQL.Database(buffer)
   db = drizzle(sqlDb, { schema })
   saveDatabase()
