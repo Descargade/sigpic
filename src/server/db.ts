@@ -1,6 +1,6 @@
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres'
 import pg from 'pg'
-import * as schema from '../db/schema.pg'
+import * as schema from '../db/schema.pg.js'
 
 let db: NodePgDatabase<typeof schema> | null = null
 

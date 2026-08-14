@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
-import { getDb } from '../db'
-import { userProfileTable } from '../../db/schema.pg'
+import { getDb } from '../db.js'
+import { userProfileTable } from '../../db/schema.pg.js'
 import { eq } from 'drizzle-orm'
+import { prepareForDb } from '../date-utils.js'
 
 export const profileRouter = new Hono()
 
@@ -26,10 +27,10 @@ profileRouter.put('/', async (c) => {
 
     if (existing.length > 0) {
       await db.update(userProfileTable)
-        .set({ ...body, updatedAt: new Date() })
+        .set({ ...prepareForDb(userProfileTable, body), updatedAt: new Date() })
         .where(eq(userProfileTable.id, existing[0].id))
     } else {
-      await db.insert(userProfileTable).values(body)
+      await db.insert(userProfileTable).values(prepareForDb(userProfileTable, body))
     }
 
     const updated = await db.select().from(userProfileTable).limit(1)

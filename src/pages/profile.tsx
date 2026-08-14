@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Trash2, Save } from 'lucide-react'
+import { Trash2, Save, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,21 +18,62 @@ const levelColors: Record<SkillLevel, 'default' | 'secondary' | 'accent'> = {
   avanzado: 'default',
 }
 
+const emptyProfile: UserProfile = {
+  id: 0,
+  name: '',
+  brand: '2bleA',
+  description: '',
+  experience: '',
+  languages: ['Español'],
+  availability: 'Tiempo completo',
+  hoursPerWeek: 40,
+  preferredJobTypes: [],
+  avoidedJobTypes: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+}
+
 export function Profile() {
   const queryClient = useQueryClient()
   const [saved, setSaved] = useState(false)
+  const [localProfile, setLocalProfile] = useState<UserProfile | null>(null)
   const [newSkill, setNewSkill] = useState({ name: '', level: 'intermedio' as SkillLevel, category: '' })
+  const [error, setError] = useState<string | null>(null)
 
   // Queries
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading, isError, error: queryError } = useQuery({
     queryKey: ['profile'],
     queryFn: profileApi.get,
+    retry: 2,
   })
 
   const { data: skills = [] } = useQuery({
     queryKey: ['skills'],
     queryFn: skillsApi.getAll,
+    retry: 2,
   })
+
+  // Sync local profile when query data changes
+  useEffect(() => {
+    if (profile) {
+      setLocalProfile(profile)
+      setError(null)
+    } else if (!isLoading && !isError) {
+      // No profile in DB, use empty template
+      setLocalProfile(emptyProfile)
+    }
+  }, [profile, isLoading, isError])
+
+  // Handle query errors
+  useEffect(() => {
+    if (isError) {
+      setError(queryError?.message ?? 'Error al cargar el perfil')
+      // Use cached or empty profile
+      setLocalProfile(emptyProfile)
+    }
+  }, [isError, queryError])
+
+  const displayProfile = localProfile
 
   // Mutations
   const updateProfileMutation = useMutation({
@@ -41,6 +82,9 @@ export function Profile() {
       queryClient.invalidateQueries({ queryKey: ['profile'] })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
+    },
+    onError: (err) => {
+      setError(err.message)
     },
   })
 
@@ -63,8 +107,9 @@ export function Profile() {
   })
 
   function saveProfile() {
-    if (!profile) return
-    updateProfileMutation.mutate(profile)
+    if (!displayProfile) return
+    setError(null)
+    updateProfileMutation.mutate(displayProfile)
   }
 
   function addSkill() {
@@ -93,7 +138,7 @@ export function Profile() {
     {} as Record<string, Skill[]>
   )
 
-  if (profileLoading) {
+  if (isLoading && !displayProfile) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -101,10 +146,12 @@ export function Profile() {
     )
   }
 
-  if (!profile) {
+  if (!displayProfile) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-muted-foreground">No se pudo cargar el perfil</p>
+        <AlertCircle className="h-12 w-12 text-muted-foreground" />
+        <p className="mt-4 text-muted-foreground">No se pudo cargar el perfil</p>
+        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       </div>
     )
   }
@@ -116,6 +163,13 @@ export function Profile() {
         <p className="text-muted-foreground">Configura tu perfil para análisis de oportunidades</p>
       </div>
 
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          <AlertCircle className="h-4 w-4" />
+          {error}
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Información General</CardTitle>
@@ -126,8 +180,8 @@ export function Profile() {
               <Label htmlFor="name">Nombre</Label>
               <Input
                 id="name"
-                value={profile.name}
-                onChange={(e) => updateProfileMutation.mutate({ ...profile, name: e.target.value })}
+                value={displayProfile.name}
+                onChange={(e) => setLocalProfile({ ...displayProfile, name: e.target.value })}
                 placeholder="Tu nombre"
               />
             </div>
@@ -135,8 +189,8 @@ export function Profile() {
               <Label htmlFor="brand">Marca</Label>
               <Input
                 id="brand"
-                value={profile.brand}
-                onChange={(e) => updateProfileMutation.mutate({ ...profile, brand: e.target.value })}
+                value={displayProfile.brand}
+                onChange={(e) => setLocalProfile({ ...displayProfile, brand: e.target.value })}
                 placeholder="Tu marca personal"
               />
             </div>
@@ -146,8 +200,8 @@ export function Profile() {
             <Label htmlFor="description">Descripción profesional</Label>
             <Textarea
               id="description"
-              value={profile.description}
-              onChange={(e) => updateProfileMutation.mutate({ ...profile, description: e.target.value })}
+              value={displayProfile.description}
+              onChange={(e) => setLocalProfile({ ...displayProfile, description: e.target.value })}
               placeholder="Describe tu experiencia y especialidad..."
               rows={3}
             />
@@ -157,8 +211,8 @@ export function Profile() {
             <Label htmlFor="experience">Experiencia</Label>
             <Textarea
               id="experience"
-              value={profile.experience}
-              onChange={(e) => updateProfileMutation.mutate({ ...profile, experience: e.target.value })}
+              value={displayProfile.experience}
+              onChange={(e) => setLocalProfile({ ...displayProfile, experience: e.target.value })}
               placeholder="Describe tu experiencia laboral..."
               rows={3}
             />
@@ -169,8 +223,8 @@ export function Profile() {
               <Label htmlFor="languages">Idiomas (separados por coma)</Label>
               <Input
                 id="languages"
-                value={profile.languages.join(', ')}
-                onChange={(e) => updateProfileMutation.mutate({ ...profile, languages: e.target.value.split(',').map((l) => l.trim()).filter(Boolean) })}
+                value={displayProfile.languages.join(', ')}
+                onChange={(e) => setLocalProfile({ ...displayProfile, languages: e.target.value.split(',').map((l) => l.trim()).filter(Boolean) })}
                 placeholder="Español, Inglés"
               />
             </div>
@@ -178,8 +232,8 @@ export function Profile() {
               <Label htmlFor="availability">Disponibilidad</Label>
               <Input
                 id="availability"
-                value={profile.availability}
-                onChange={(e) => updateProfileMutation.mutate({ ...profile, availability: e.target.value })}
+                value={displayProfile.availability}
+                onChange={(e) => setLocalProfile({ ...displayProfile, availability: e.target.value })}
                 placeholder="Tiempo completo, Medio tiempo..."
               />
             </div>
@@ -191,8 +245,8 @@ export function Profile() {
               <Input
                 id="hoursPerWeek"
                 type="number"
-                value={profile.hoursPerWeek}
-                onChange={(e) => updateProfileMutation.mutate({ ...profile, hoursPerWeek: parseInt(e.target.value) || 0 })}
+                value={displayProfile.hoursPerWeek}
+                onChange={(e) => setLocalProfile({ ...displayProfile, hoursPerWeek: parseInt(e.target.value) || 0 })}
               />
             </div>
           </div>
@@ -201,8 +255,8 @@ export function Profile() {
             <Label htmlFor="preferredJobTypes">Tipos de trabajo preferidos</Label>
             <Input
               id="preferredJobTypes"
-              value={profile.preferredJobTypes.join(', ')}
-              onChange={(e) => updateProfileMutation.mutate({ ...profile, preferredJobTypes: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+              value={displayProfile.preferredJobTypes.join(', ')}
+              onChange={(e) => setLocalProfile({ ...displayProfile, preferredJobTypes: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
               placeholder="Frontend, Full Stack, SaaS"
             />
           </div>
@@ -211,8 +265,8 @@ export function Profile() {
             <Label htmlFor="avoidedJobTypes">Tipos de trabajo a evitar</Label>
             <Input
               id="avoidedJobTypes"
-              value={profile.avoidedJobTypes.join(', ')}
-              onChange={(e) => updateProfileMutation.mutate({ ...profile, avoidedJobTypes: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
+              value={displayProfile.avoidedJobTypes.join(', ')}
+              onChange={(e) => setLocalProfile({ ...displayProfile, avoidedJobTypes: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
               placeholder="WordPress, PHP"
             />
           </div>

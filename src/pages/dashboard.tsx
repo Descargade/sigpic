@@ -31,25 +31,29 @@ export function Dashboard() {
   }, [])
 
   function loadStats() {
-    const db = getDb()
+    try {
+      const db = getDb()
 
-    const total = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).get()
-    const newOps = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status = 'nueva'`).get()
-    const excellent = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`compatibility_score >= 90`).get()
-    const proposals = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status IN ('propuesta_generada', 'propuesta_enviada')`).get()
-    const sent = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status = 'propuesta_enviada'`).get()
-    const won = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status = 'ganada'`).get()
-    const lost = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status = 'perdida'`).get()
+      const total = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).get()
+      const newOps = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status = 'nueva'`).get()
+      const excellent = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`compatibility_score >= 90`).get()
+      const proposals = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status IN ('propuesta_generada', 'propuesta_enviada')`).get()
+      const sent = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status = 'propuesta_enviada'`).get()
+      const won = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status = 'ganada'`).get()
+      const lost = db.select({ count: sql<number>`count(*)` }).from(jobOpportunitiesTable).where(sql`status = 'perdida'`).get()
 
-    setStats({
-      totalOpportunities: total?.count ?? 0,
-      newOpportunities: newOps?.count ?? 0,
-      excellentOpportunities: excellent?.count ?? 0,
-      proposalsGenerated: proposals?.count ?? 0,
-      proposalsSent: sent?.count ?? 0,
-      wonProjects: won?.count ?? 0,
-      lostProjects: lost?.count ?? 0,
-    })
+      setStats({
+        totalOpportunities: total?.count ?? 0,
+        newOpportunities: newOps?.count ?? 0,
+        excellentOpportunities: excellent?.count ?? 0,
+        proposalsGenerated: proposals?.count ?? 0,
+        proposalsSent: sent?.count ?? 0,
+        wonProjects: won?.count ?? 0,
+        lostProjects: lost?.count ?? 0,
+      })
+    } catch {
+      // Database not ready yet, use default zeros
+    }
   }
 
   const statCards = [

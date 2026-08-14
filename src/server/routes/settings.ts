@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
-import { getDb } from '../db'
-import { searchPreferencesTable, scoringWeightsTable } from '../../db/schema.pg'
+import { getDb } from '../db.js'
+import { searchPreferencesTable, scoringWeightsTable } from '../../db/schema.pg.js'
 import { eq } from 'drizzle-orm'
 
 export const settingsRouter = new Hono()

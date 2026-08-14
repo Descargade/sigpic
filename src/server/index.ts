@@ -1,10 +1,10 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { profileRouter } from './routes/profile'
-import { skillsRouter } from './routes/skills'
-import { portfolioRouter } from './routes/portfolio'
-import { opportunitiesRouter } from './routes/opportunities'
-import { settingsRouter } from './routes/settings'
+import { profileRouter } from './routes/profile.js'
+import { skillsRouter } from './routes/skills.js'
+import { portfolioRouter } from './routes/portfolio.js'
+import { opportunitiesRouter } from './routes/opportunities.js'
+import { settingsRouter } from './routes/settings.js'
 
 const app = new Hono()
 

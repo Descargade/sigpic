@@ -1,6 +1,7 @@
 import initSqlJs, { type Database } from 'sql.js'
 import { drizzle, type SQLJsDatabase } from 'drizzle-orm/sql-js'
 import * as schema from './schema'
+import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url'
 
 let db: SQLJsDatabase<typeof schema> | null = null
 let sqlDb: Database | null = null
@@ -10,7 +11,7 @@ const DB_STORAGE_KEY = '2blea-db-backup'
 export async function initDatabase(): Promise<SQLJsDatabase<typeof schema>> {
   if (db) return db
 
-  const SQL = await initSqlJs()
+  const SQL = await initSqlJs({ locateFile: () => wasmUrl })
 
   const savedData = localStorage.getItem(DB_STORAGE_KEY)
   if (savedData) {
@@ -319,6 +320,10 @@ export async function importBackup(base64Data: string): Promise<void> {
 }
 
 export function getDb(): SQLJsDatabase<typeof schema> {
-  if (!db) throw new Error('Database not initialized')
+  if (!db) return null as unknown as SQLJsDatabase<typeof schema>
   return db
+}
+
+export function isDbReady(): boolean {
+  return db !== null
 }

@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
-import { getDb } from '../db'
-import { jobOpportunitiesTable } from '../../db/schema.pg'
+import { getDb } from '../db.js'
+import { jobOpportunitiesTable } from '../../db/schema.pg.js'
 import { eq, desc } from 'drizzle-orm'
+import { prepareForDb } from '../date-utils.js'
 
 export const opportunitiesRouter = new Hono()
 
@@ -33,7 +34,7 @@ opportunitiesRouter.post('/', async (c) => {
   try {
     const body = await c.req.json()
     const db = getDb()
-    const result = await db.insert(jobOpportunitiesTable).values(body).returning()
+    const result = await db.insert(jobOpportunitiesTable).values(prepareForDb(jobOpportunitiesTable, body)).returning()
     return c.json({ success: true, data: result[0] })
   } catch (error) {
     return c.json({ success: false, error: (error as Error).message }, 500)
@@ -47,7 +48,7 @@ opportunitiesRouter.put('/:id', async (c) => {
     const body = await c.req.json()
     const db = getDb()
     const result = await db.update(jobOpportunitiesTable)
-      .set({ ...body, updatedAt: new Date() })
+      .set({ ...prepareForDb(jobOpportunitiesTable, body), updatedAt: new Date() })
       .where(eq(jobOpportunitiesTable.id, id))
       .returning()
     return c.json({ success: true, data: result[0] })

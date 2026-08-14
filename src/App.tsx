@@ -15,14 +15,14 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60,
       gcTime: 1000 * 60 * 5,
+      retry: 1,
     },
   },
 })
 
 function App() {
   useEffect(() => {
-    // Inicializar sql.js en background (para páginas no migradas aún)
-    initDatabase().catch(() => {})
+    initDatabase().catch(console.error)
   }, [])
 
   return (

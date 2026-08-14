@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
-import { getDb } from '../db'
-import { portfolioProjectsTable } from '../../db/schema.pg'
+import { getDb } from '../db.js'
+import { portfolioProjectsTable } from '../../db/schema.pg.js'
 import { eq } from 'drizzle-orm'
+import { prepareForDb } from '../date-utils.js'
 
 export const portfolioRouter = new Hono()
 
@@ -21,7 +22,7 @@ portfolioRouter.post('/', async (c) => {
   try {
     const body = await c.req.json()
     const db = getDb()
-    const result = await db.insert(portfolioProjectsTable).values(body).returning()
+    const result = await db.insert(portfolioProjectsTable).values(prepareForDb(portfolioProjectsTable, body)).returning()
     return c.json({ success: true, data: result[0] })
   } catch (error) {
     return c.json({ success: false, error: (error as Error).message }, 500)
@@ -35,7 +36,7 @@ portfolioRouter.put('/:id', async (c) => {
     const body = await c.req.json()
     const db = getDb()
     const result = await db.update(portfolioProjectsTable)
-      .set({ ...body, updatedAt: new Date() })
+      .set({ ...prepareForDb(portfolioProjectsTable, body), updatedAt: new Date() })
       .where(eq(portfolioProjectsTable.id, id))
       .returning()
     return c.json({ success: true, data: result[0] })
