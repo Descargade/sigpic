@@ -596,13 +596,13 @@ function DiagramInner({
 
   // Track changes
   useEffect(() => {
-    if (!saved) {
-      setHasChanges(false);
-      return;
-    }
     const currentPositions: Record<string, { x: number; y: number }> = {};
     for (const n of nodesWithExpanded) {
       currentPositions[n.id] = n.position;
+    }
+    if (!saved) {
+      setHasChanges(Object.keys(currentPositions).length > 0);
+      return;
     }
     const posChanged = JSON.stringify(currentPositions) !== JSON.stringify(saved.positions);
     const edgeChanged = hiddenEdges.size !== saved.hiddenEdges.length ||
