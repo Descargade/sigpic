@@ -922,7 +922,7 @@ export default function Diagramas() {
   }
 
   return (
-    <div className="flex flex-col min-h-0">
+    <div className="flex flex-col min-h-0 flex-1">
       <div className="px-4 pt-4 pb-2 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Diagramas</h1>
