@@ -1,9 +1,17 @@
 {
-  "framework": "vite",
-  "buildCommand": "pnpm build",
-  "outputDirectory": "dist",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "rm -rf node_modules artifacts/sigpic/node_modules lib/*/node_modules && cp package.npm.json package.json && cp artifacts/sigpic/package.npm.json artifacts/sigpic/package.json && rm -f pnpm-lock.yaml && echo '' > .npmrc && npm install",
+  "buildCommand": "cd artifacts/sigpic && npm run build",
+  "outputDirectory": "artifacts/sigpic/dist/public",
+  "framework": null,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.mjs"
+    },
+    {
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
+    }
   ]
 }

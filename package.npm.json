@@ -1,0 +1,11 @@
+{
+  "name": "sistema-inv",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "artifacts/sigpic"
+  ],
+  "scripts": {
+    "build": "cd artifacts/sigpic && npm run build"
+  }
+}
