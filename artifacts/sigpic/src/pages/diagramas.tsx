@@ -105,6 +105,7 @@ const EDGE_COLORS: Record<string, string> = {
 interface DiagramState {
   positions: Record<string, { x: number; y: number }>;
   hiddenEdges: string[];
+  expandedGroups: string[];
 }
 
 function loadDiagramState(key: string): DiagramState | null {
@@ -585,6 +586,7 @@ function DiagramInner({
     if (state) {
       setSaved(state);
       setHiddenEdges(new Set(state.hiddenEdges));
+      setExpandedGroups(new Set(state.expandedGroups || []));
       setNodes(nds => nds.map(n => {
         const pos = state.positions[n.id];
         return pos ? { ...n, position: pos } : n;
@@ -605,8 +607,10 @@ function DiagramInner({
     const posChanged = JSON.stringify(currentPositions) !== JSON.stringify(saved.positions);
     const edgeChanged = hiddenEdges.size !== saved.hiddenEdges.length ||
       [...hiddenEdges].some(e => !saved.hiddenEdges.includes(e));
-    setHasChanges(posChanged || edgeChanged);
-  }, [nodesWithExpanded, hiddenEdges, saved]);
+    const expandedChanged = expandedGroups.size !== (saved.expandedGroups?.length || 0) ||
+      [...expandedGroups].some(e => !(saved.expandedGroups || []).includes(e));
+    setHasChanges(posChanged || edgeChanged || expandedChanged);
+  }, [nodesWithExpanded, hiddenEdges, expandedGroups, saved]);
 
   // Sync initial data when not in edit mode
   useEffect(() => {
@@ -636,6 +640,7 @@ function DiagramInner({
     const state: DiagramState = {
       positions,
       hiddenEdges: [...hiddenEdges],
+      expandedGroups: [...expandedGroups],
     };
     saveDiagramState(diagramKey, state);
     setSaved(state);
@@ -839,7 +844,7 @@ function DiagramInner({
           proOptions={{ hideAttribution: true }}
           minZoom={0.1}
           maxZoom={2}
-          nodesDraggable
+          nodesDraggable={editMode}
           nodesConnectable={editMode}
           edgesUpdatable={editMode}
           elementsSelectable
@@ -950,7 +955,7 @@ export default function Diagramas() {
         ))}
       </div>
 
-      <div className="px-4 pb-4">
+      <div className="px-4 pb-4 flex justify-center">
         {mode === 'institucional' && <DiagramaInstitucional diagramKey="institucional" editMode={editMode} setEditMode={setEditMode} />}
         {mode === 'patrimonial' && <DiagramaPatrimonial diagramKey="patrimonial" editMode={editMode} setEditMode={setEditMode} />}
         {mode === 'tecnico' && <DiagramaTecnico diagramKey="tecnico" editMode={editMode} setEditMode={setEditMode} />}
