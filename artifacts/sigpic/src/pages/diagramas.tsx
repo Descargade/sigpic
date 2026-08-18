@@ -736,7 +736,7 @@ function DiagramInner({
   if (isLoading) return <Skeleton className="h-[600px] w-full rounded-xl" />;
 
   return (
-    <div className="relative flex flex-col h-full">
+    <div className="relative flex flex-col">
       {/* Top-right controls */}
       <div className="absolute top-3 right-3 z-10 flex gap-2 flex-wrap justify-end">
         <Button size="sm" variant="outline" className="bg-background/90 backdrop-blur shadow-md border text-xs"
@@ -816,7 +816,7 @@ function DiagramInner({
       )}
 
       {/* Canvas */}
-      <div ref={wrapperRef} className={`h-[750px] overflow-auto border rounded-xl shadow-inner ${bgClass}`}>
+      <div ref={wrapperRef} className={`h-[650px] max-w-[500px] border rounded-xl shadow-inner ${bgClass}`}>
         <ReactFlow
           nodes={nodesWithExpanded}
           edges={visibleEdges}
@@ -833,7 +833,8 @@ function DiagramInner({
             grupo: GrupoNode,
           }}
           defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
-          defaultViewport={{ zoom: 0.5, x: 20, y: 20 }}
+          fitView
+          fitViewOptions={{ padding: 0.15 }}
           attributionPosition="bottom-left"
           proOptions={{ hideAttribution: true }}
           minZoom={0.1}
@@ -921,7 +922,7 @@ export default function Diagramas() {
   }
 
   return (
-    <div className="flex flex-col overflow-hidden">
+    <div className="flex flex-col">
       <div className="px-4 pt-4 pb-2 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Diagramas</h1>
@@ -949,7 +950,7 @@ export default function Diagramas() {
         ))}
       </div>
 
-      <div className="flex-1 min-h-0 px-4 pb-4">
+      <div className="px-4 pb-4">
         {mode === 'institucional' && <DiagramaInstitucional diagramKey="institucional" editMode={editMode} setEditMode={setEditMode} />}
         {mode === 'patrimonial' && <DiagramaPatrimonial diagramKey="patrimonial" editMode={editMode} setEditMode={setEditMode} />}
         {mode === 'tecnico' && <DiagramaTecnico diagramKey="tecnico" editMode={editMode} setEditMode={setEditMode} />}
