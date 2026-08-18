@@ -834,7 +834,7 @@ function DiagramInner({
           }}
           defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
           fitView
-          fitViewOptions={{ padding: 0.15 }}
+          fitViewOptions={{ padding: 0.15, maxZoom: 0.6 }}
           attributionPosition="bottom-left"
           proOptions={{ hideAttribution: true }}
           minZoom={0.1}
