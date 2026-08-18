@@ -1,119 +1,164 @@
-import { useEffect, useState } from 'react'
-import { Trash2, Save, ExternalLink, Code2 } from 'lucide-react'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Trash2, Save, ExternalLink, Code2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getDb, saveDatabase } from '@/db'
-import { portfolioProjectsTable } from '@/db/schema'
-import { sql } from 'drizzle-orm'
-import { mapPortfolioProject } from '@/db/mappers'
+import { portfolioApi } from '@/api/portfolio'
 import type { PortfolioProject } from '@/types'
 
 const categories = ['Web App', 'Mobile App', 'Dashboard', 'SaaS', 'Landing Page', 'E-commerce', 'Otro']
 const statuses = ['activo', 'completado', 'pausado'] as const
 
+type FormData = {
+  name: string
+  description: string
+  url: string
+  github: string
+  technologies: string
+  category: string
+  imageUrl: string
+  relevanceLevel: number
+  problemSolved: string
+  date: string
+  status: 'activo' | 'completado' | 'pausado'
+}
+
+const emptyForm: FormData = {
+  name: '',
+  description: '',
+  url: '',
+  github: '',
+  technologies: '',
+  category: 'Web App',
+  imageUrl: '',
+  relevanceLevel: 5,
+  problemSolved: '',
+  date: new Date().toISOString().split('T')[0],
+  status: 'activo',
+}
+
+function toFormData(project: PortfolioProject): FormData {
+  return {
+    name: project.name,
+    description: project.description,
+    url: project.url || '',
+    github: project.github || '',
+    technologies: project.technologies.join(', '),
+    category: project.category,
+    imageUrl: project.imageUrl || '',
+    relevanceLevel: project.relevanceLevel,
+    problemSolved: project.problemSolved,
+    date: project.date,
+    status: project.status,
+  }
+}
+
 export function Portfolio() {
-  const [projects, setProjects] = useState<PortfolioProject[]>([])
+  const queryClient = useQueryClient()
   const [editing, setEditing] = useState<PortfolioProject | null>(null)
-  const [form, setForm] = useState({
-    name: '',
-    description: '',
-    url: '',
-    github: '',
-    technologies: '',
-    category: 'Web App',
-    imageUrl: '',
-    relevanceLevel: 5,
-    problemSolved: '',
-    date: new Date().toISOString().split('T')[0],
-    status: 'activo' as 'activo' | 'completado' | 'pausado',
-  })
+  const [form, setForm] = useState<FormData>(emptyForm)
   const [saved, setSaved] = useState(false)
 
-  useEffect(() => {
-    loadProjects()
-  }, [])
+  const { data: projects = [], isLoading, isError, error: queryError } = useQuery({
+    queryKey: ['portfolio'],
+    queryFn: portfolioApi.getAll,
+    retry: 2,
+  })
 
-  function loadProjects() {
-    const db = getDb()
-    const results = db.select().from(portfolioProjectsTable).all()
-    setProjects(results.map(mapPortfolioProject))
-  }
+  const createMutation = useMutation({
+    mutationFn: (data: Omit<PortfolioProject, 'id' | 'createdAt' | 'updatedAt'>) =>
+      portfolioApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portfolio'] })
+      resetForm()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<PortfolioProject> }) =>
+      portfolioApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portfolio'] })
+      resetForm()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => portfolioApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portfolio'] })
+    },
+  })
 
   function resetForm() {
-    setForm({
-      name: '',
-      description: '',
-      url: '',
-      github: '',
-      technologies: '',
-      category: 'Web App',
-      imageUrl: '',
-      relevanceLevel: 5,
-      problemSolved: '',
-      date: new Date().toISOString().split('T')[0],
-      status: 'activo',
-    })
+    setForm(emptyForm)
     setEditing(null)
   }
 
   function editProject(project: PortfolioProject) {
     setEditing(project)
-    setForm({
-      name: project.name,
-      description: project.description,
-      url: project.url || '',
-      github: project.github || '',
-      technologies: project.technologies.join(', '),
-      category: project.category,
-      imageUrl: project.imageUrl || '',
-      relevanceLevel: project.relevanceLevel,
-      problemSolved: project.problemSolved,
-      date: project.date,
-      status: project.status,
-    })
+    setForm(toFormData(project))
   }
 
   function saveProject() {
     if (!form.name.trim() || !form.description.trim()) return
 
-    const db = getDb()
     const data = {
       name: form.name.trim(),
       description: form.description.trim(),
       url: form.url.trim() || null,
       github: form.github.trim() || null,
-      technologies: JSON.stringify(form.technologies.split(',').map((t) => t.trim()).filter(Boolean)),
+      technologies: form.technologies.split(',').map((t) => t.trim()).filter(Boolean),
       category: form.category,
       imageUrl: form.imageUrl.trim() || null,
       relevanceLevel: form.relevanceLevel,
       problemSolved: form.problemSolved.trim(),
       date: form.date,
       status: form.status,
-      updatedAt: new Date(),
     }
 
     if (editing) {
-      db.update(portfolioProjectsTable).set(data).where(sql`id = ${editing.id}`).run()
+      updateMutation.mutate({ id: editing.id, data })
     } else {
-      db.insert(portfolioProjectsTable).values({ ...data, createdAt: new Date() }).run()
+      createMutation.mutate(data)
     }
-
-    saveDatabase()
-    resetForm()
-    loadProjects()
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
   }
 
   function deleteProject(id: number) {
-    const db = getDb()
-    db.delete(portfolioProjectsTable).where(sql`id = ${id}`).run()
-    saveDatabase()
-    loadProjects()
+    deleteMutation.mutate(id)
+  }
+
+  const isPending = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Portfolio</h1>
+          <p className="text-muted-foreground">Gestiona tus proyectos para mostrar a clientes</p>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          <AlertCircle className="h-4 w-4" />
+          {queryError?.message ?? 'Error al cargar los proyectos'}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -250,9 +295,9 @@ export function Portfolio() {
                 Cancelar
               </Button>
             )}
-            <Button onClick={saveProject} disabled={!form.name.trim() || !form.description.trim()}>
+            <Button onClick={saveProject} disabled={!form.name.trim() || !form.description.trim() || isPending}>
               <Save className="h-4 w-4" />
-              {saved ? 'Guardado!' : editing ? 'Actualizar' : 'Agregar proyecto'}
+              {saved ? 'Guardado!' : isPending ? 'Guardando...' : editing ? 'Actualizar' : 'Agregar proyecto'}
             </Button>
           </div>
         </CardContent>
@@ -292,7 +337,7 @@ export function Portfolio() {
                   <Button variant="ghost" size="icon" onClick={() => editProject(project)}>
                     <Save className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => deleteProject(project.id)}>
+                  <Button variant="ghost" size="icon" onClick={() => deleteProject(project.id)} disabled={isPending}>
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </Button>
                 </div>
