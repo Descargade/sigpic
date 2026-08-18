@@ -733,10 +733,10 @@ function DiagramInner({
     setHasChanges(true);
   }, [setEdges]);
 
-  if (isLoading) return <Skeleton className="w-full h-full min-h-[400px] rounded-xl" />;
+  if (isLoading) return <Skeleton className="h-[600px] w-full rounded-xl" />;
 
   return (
-    <div className="relative w-full h-full min-h-[400px]">
+    <div className="relative flex flex-col h-full">
       {/* Top-right controls */}
       <div className="absolute top-3 right-3 z-10 flex gap-2 flex-wrap justify-end">
         <Button size="sm" variant="outline" className="bg-background/90 backdrop-blur shadow-md border text-xs"
@@ -816,7 +816,7 @@ function DiagramInner({
       )}
 
       {/* Canvas */}
-      <div ref={wrapperRef} className={`absolute inset-0 border rounded-xl shadow-inner overflow-hidden ${bgClass}`}>
+      <div ref={wrapperRef} className={`h-[650px] border rounded-xl shadow-inner ${bgClass}`}>
         <ReactFlow
           nodes={nodesWithExpanded}
           edges={visibleEdges}
@@ -922,7 +922,7 @@ export default function Diagramas() {
   }
 
   return (
-    <div className="flex flex-col min-h-0 flex-1">
+    <div className="flex flex-col overflow-hidden">
       <div className="px-4 pt-4 pb-2 flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Diagramas</h1>
@@ -950,7 +950,7 @@ export default function Diagramas() {
         ))}
       </div>
 
-      <div className="px-4 py-4 flex-1 min-h-0 overflow-hidden">
+      <div className="flex-1 min-h-0 px-4 pb-4">
         {mode === 'institucional' && <DiagramaInstitucional diagramKey="institucional" editMode={editMode} setEditMode={setEditMode} />}
         {mode === 'patrimonial' && <DiagramaPatrimonial diagramKey="patrimonial" editMode={editMode} setEditMode={setEditMode} />}
         {mode === 'tecnico' && <DiagramaTecnico diagramKey="tecnico" editMode={editMode} setEditMode={setEditMode} />}
@@ -980,7 +980,7 @@ function DiagramaInstitucional({ showLegend, diagramKey, editMode, setEditMode }
   const isLoading = !dependencias || !bienes;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="mb-2 flex items-center justify-between shrink-0">
         <div>
           <h2 className="text-lg font-bold">{instName} — Diagrama Organizacional</h2>
@@ -988,14 +988,12 @@ function DiagramaInstitucional({ showLegend, diagramKey, editMode, setEditMode }
         </div>
         <Badge variant="outline" className="text-xs">{dependencias?.length || 0} dependencias · {bienes?.length || 0} bienes</Badge>
       </div>
-      <div className="flex-1 min-h-0">
-        <DiagramWrapper
-          initialNodes={layoutNodes} initialEdges={layoutEdges}
-          isLoading={isLoading} bgClass="bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30"
-          downloadLabel="diagrama-institucional" showLegend={showLegend}
-          diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
-        />
-      </div>
+      <DiagramWrapper
+        initialNodes={layoutNodes} initialEdges={layoutEdges}
+        isLoading={isLoading} bgClass="bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30"
+        downloadLabel="diagrama-institucional" showLegend={showLegend}
+        diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
+      />
     </div>
   );
 }
@@ -1067,7 +1065,7 @@ function DiagramaPatrimonial({ showLegend, diagramKey, editMode, setEditMode }: 
   const isLoading = !dependencias || !bienes;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="mb-2 flex items-center justify-between shrink-0">
         <div>
           <h2 className="text-lg font-bold">Distribución Patrimonial</h2>
@@ -1075,14 +1073,12 @@ function DiagramaPatrimonial({ showLegend, diagramKey, editMode, setEditMode }: 
         </div>
         <Badge variant="outline" className="text-xs">{bienes?.length || 0} bienes</Badge>
       </div>
-      <div className="flex-1 min-h-0">
-        <DiagramWrapper
-          initialNodes={layoutNodes} initialEdges={layoutEdges}
-          isLoading={isLoading} bgClass="bg-gradient-to-br from-emerald-50/30 to-white dark:from-emerald-950/30 dark:to-gray-900"
-          downloadLabel="diagrama-patrimonial" showLegend={showLegend}
-          diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
-        />
-      </div>
+      <DiagramWrapper
+        initialNodes={layoutNodes} initialEdges={layoutEdges}
+        isLoading={isLoading} bgClass="bg-gradient-to-br from-emerald-50/30 to-white dark:from-emerald-950/30 dark:to-gray-900"
+        downloadLabel="diagrama-patrimonial" showLegend={showLegend}
+        diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
+      />
     </div>
   );
 }
@@ -1152,7 +1148,7 @@ function DiagramaTecnico({ showLegend, diagramKey, editMode, setEditMode }: {
   const isLoading = !bienes;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       <div className="mb-2 flex items-center justify-between shrink-0">
         <div>
           <h2 className="text-lg font-bold">Relaciones Técnicas</h2>
@@ -1160,14 +1156,12 @@ function DiagramaTecnico({ showLegend, diagramKey, editMode, setEditMode }: {
         </div>
         <Badge variant="outline" className="text-xs">{bienes?.filter((b: any) => !b.parentId).length || 0} equipos</Badge>
       </div>
-      <div className="flex-1 min-h-0">
-        <DiagramWrapper
-          initialNodes={layoutNodes} initialEdges={layoutEdges}
-          isLoading={isLoading} bgClass="bg-gradient-to-br from-cyan-50/30 to-white dark:from-cyan-950/30 dark:to-gray-900"
-          downloadLabel="diagrama-tecnico" showLegend={showLegend}
-          diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
+      <DiagramWrapper
+        initialNodes={layoutNodes} initialEdges={layoutEdges}
+        isLoading={isLoading} bgClass="bg-gradient-to-br from-cyan-50/30 to-white dark:from-cyan-950/30 dark:to-gray-900"
+        downloadLabel="diagrama-tecnico" showLegend={showLegend}
+        diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
         />
-      </div>
     </div>
   );
 }
