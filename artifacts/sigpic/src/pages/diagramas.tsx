@@ -833,8 +833,7 @@ function DiagramInner({
             grupo: GrupoNode,
           }}
           defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
-          fitView
-          fitViewOptions={{ padding: 0.15, maxZoom: 0.6 }}
+          defaultViewport={{ zoom: 0.5, x: 20, y: 20 }}
           attributionPosition="bottom-left"
           proOptions={{ hideAttribution: true }}
           minZoom={0.1}
