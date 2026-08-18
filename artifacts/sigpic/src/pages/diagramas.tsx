@@ -470,6 +470,8 @@ function GrupoNode({ data, id }: { data: any; id: string }) {
       <div className="rounded-xl shadow-lg border border-black/5 transition-all hover:shadow-xl" style={{ background: COLORS.grupo.bg, width: NODE_W }}>
         <div
           className="w-full flex items-center gap-2 px-3 py-2.5 cursor-pointer select-none text-left"
+          onClick={(e) => { e.stopPropagation(); data.__onToggle?.(id); }}
+          onPointerDown={(e) => { e.stopPropagation(); }}
         >
           <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
             <Layers className="w-4 h-4 text-white" />
@@ -791,7 +793,7 @@ function DiagramInner({
 
       {/* Unsaved changes indicator */}
       {hasChanges && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-amber-500 text-white text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 bg-amber-500 text-white text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
           <AlertCircle className="w-3.5 h-3.5" />
           Cambios sin guardar
         </div>
