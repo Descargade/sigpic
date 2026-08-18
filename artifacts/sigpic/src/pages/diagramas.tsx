@@ -816,7 +816,7 @@ function DiagramInner({
       )}
 
       {/* Canvas */}
-      <div ref={wrapperRef} className={`h-[650px] max-w-[680px] overflow-auto border rounded-xl shadow-inner ${bgClass}`}>
+      <div ref={wrapperRef} className={`h-[750px] overflow-auto border rounded-xl shadow-inner ${bgClass}`}>
         <ReactFlow
           nodes={nodesWithExpanded}
           edges={visibleEdges}
