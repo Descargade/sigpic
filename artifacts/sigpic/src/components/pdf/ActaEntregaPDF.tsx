@@ -25,8 +25,22 @@ interface ActaEntregaPDFProps {
   cargoFirmante?: string;
 }
 
+function buildDescripcion(b: BienData): string {
+  const parts: string[] = [];
+  if (b.codigoInterno) parts.push(`Código: ${b.codigoInterno}`);
+  if (b.numeroPatrimonial) parts.push(`Patrimonial: ${b.numeroPatrimonial}`);
+  parts.push(`Nombre: ${b.nombre}`);
+  if (b.marca) parts.push(`Marca: ${b.marca}`);
+  if (b.modelo) parts.push(`Modelo: ${b.modelo}`);
+  if (b.numeroSerie) parts.push(`Serie: ${b.numeroSerie}`);
+  if (b.categoriaNombre) parts.push(`Categoría: ${b.categoriaNombre}`);
+  parts.push(`Estado: ${b.estadoFisico}`);
+  return parts.join('\n');
+}
+
 export function ActaEntregaPDF({ bien, responsableAnterior, institucion = 'Institución', unidad = 'Unidad', firmante = '________________________________', cargoFirmante = 'Cargo' }: ActaEntregaPDFProps) {
-  const fechaStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const fechaStr = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const horaStr = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <Document>
@@ -45,75 +59,63 @@ export function ActaEntregaPDF({ bien, responsableAnterior, institucion = 'Insti
           </View>
         </View>
 
-        <Text style={docStyles.docTitle}>Acta de Entrega / Recepción</Text>
-        <Text style={docStyles.docSubtitle}>Transferencia de bien patrimonial entre funcionarios</Text>
+        <Text style={docStyles.docTitle}>Acta de Entrega y Responsabilidad</Text>
+        <View style={docStyles.horizontalLine} />
 
-        <View style={{ marginTop: 15, padding: 12, borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 4, backgroundColor: '#f0f7ff' }}>
-          <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#1e3a5f', marginBottom: 8 }}>DATOS DEL BIEN</Text>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Nombre:</Text>
-            <Text style={[docStyles.infoValue, { fontFamily: 'Helvetica-Bold' }]}>{bien.nombre}</Text>
+        <Text style={docStyles.docSubtitle}>
+          En la ciudad de, día {fechaStr}, a las {horaStr} horas, se hace entrega del siguiente bien patrimonial{responsableAnterior ? ` por parte de ${responsableAnterior}` : ''}, el cual pasa a ser responsabilidad del funcionario que recibe. El mismo declara haber recibido el bien en las condiciones descritas en el presente acta.
+        </Text>
+
+        <View style={docStyles.table}>
+          <View style={docStyles.tableHeader}>
+            <Text style={[docStyles.tableHeaderText, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>#</Text>
+            <Text style={[docStyles.tableHeaderText, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>DESCRIPCION</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 50 }]}>CANT.</Text>
           </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Código Interno:</Text>
-            <Text style={docStyles.infoValue}>{bien.codigoInterno || 'Sin código'}</Text>
+          <View style={[docStyles.tableRow, docStyles.tableRowAlt]}>
+            <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>1</Text>
+            <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+              {buildDescripcion(bien)}
+            </Text>
+            <Text style={[docStyles.tableCellLast, { width: 50, textAlign: 'center' }]}>1</Text>
           </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Nº Patrimonial:</Text>
-            <Text style={docStyles.infoValue}>{bien.numeroPatrimonial || 'N/A'}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Nº Serie:</Text>
-            <Text style={docStyles.infoValue}>{bien.numeroSerie || 'N/A'}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Marca / Modelo:</Text>
-            <Text style={docStyles.infoValue}>{bien.marca || '-'} {bien.modelo || ''}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Estado Físico:</Text>
-            <Text style={docStyles.infoValue}>{bien.estadoFisico}</Text>
-          </View>
-          {bien.categoriaNombre && (
-            <View style={docStyles.infoRow}>
-              <Text style={docStyles.infoLabel}>Categoría:</Text>
-              <Text style={docStyles.infoValue}>{bien.categoriaNombre}</Text>
-            </View>
-          )}
         </View>
 
         {responsableAnterior && (
-          <View style={{ marginTop: 15, padding: 12, borderWidth: 1, borderColor: '#fef3c7', borderRadius: 4, backgroundColor: '#fffbeb' }}>
-            <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#92400e', marginBottom: 5 }}>ENTREGA DE:</Text>
+          <View style={{ marginTop: 15, padding: 8, borderWidth: 1, borderColor: '#000', backgroundColor: '#fafafa' }}>
+            <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>ENTREGA DE:</Text>
             <Text style={{ fontSize: 10 }}>{responsableAnterior}</Text>
           </View>
         )}
 
-        <View style={{ marginTop: 15, padding: 12, borderWidth: 1, borderColor: '#dcfce7', borderRadius: 4, backgroundColor: '#f0fdf4' }}>
-          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#166534', marginBottom: 5 }}>RECIBE:</Text>
+        <View style={{ marginTop: 10, padding: 8, borderWidth: 1, borderColor: '#000', backgroundColor: '#fafafa' }}>
+          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>RECIBE:</Text>
           <Text style={{ fontSize: 10 }}>{bien.responsableNombre || 'Sin asignar'}</Text>
           {bien.dependenciaNombre && (
-            <Text style={{ fontSize: 9, color: '#666', marginTop: 3 }}>Dependencia: {bien.dependenciaNombre}</Text>
+            <Text style={{ fontSize: 9, color: '#444', marginTop: 3 }}>Dependencia: {bien.dependenciaNombre}</Text>
           )}
         </View>
 
-        <View style={docStyles.observations}>
-          <Text style={docStyles.observationsTitle}>OBSERVACIONES</Text>
-          <Text style={docStyles.observationsText}>
-            En esta fecha se procede a la entrega del bien detallado, el cual pasa a ser responsabilidad del funcionario que recibe. El mismo declara haber recibido el bien en las condiciones descritas.
-          </Text>
-        </View>
-
-        <View style={docStyles.signatureSection}>
-          <View style={docStyles.signatureLine}>
-            <Text style={docStyles.signatureName}>{firmante}</Text>
-            <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
+        <View style={docStyles.signatureSectionDual}>
+          <View style={docStyles.signatureBlock}>
+            <Text style={docStyles.signatureLabel}>ENTREGA</Text>
+            <View style={docStyles.signatureLine}>
+              <Text style={docStyles.signatureName}>{firmante}</Text>
+              <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
+            </View>
+          </View>
+          <View style={docStyles.signatureBlock}>
+            <Text style={docStyles.signatureLabel}>RECIBE</Text>
+            <View style={docStyles.signatureLine}>
+              <Text style={docStyles.signatureName}>{bien.responsableNombre || '________________________________'}</Text>
+              <Text style={docStyles.signatureRole}>{bien.dependenciaNombre || ''}</Text>
+            </View>
           </View>
         </View>
 
         <View style={docStyles.footer}>
           <Text>SIGPIC - Documento generado el {fechaStr}</Text>
-          <Text>Acta de Entrega / Recepción</Text>
+          <Text>Acta de Entrega y Responsabilidad</Text>
           <Text>Página 1</Text>
         </View>
       </Page>

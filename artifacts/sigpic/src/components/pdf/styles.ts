@@ -7,6 +7,8 @@ export const docStyles = StyleSheet.create({
     fontFamily: 'Helvetica',
     color: '#1a1a1a',
   },
+
+  /* ─── HEADER ──────────────────────────────────────────────── */
   header: {
     marginBottom: 20,
     borderBottomWidth: 2,
@@ -41,21 +43,32 @@ export const docStyles = StyleSheet.create({
     fontSize: 9,
     color: '#666',
   },
+
+  /* ─── TITLE (ACTA FORMAT) ────────────────────────────────── */
   docTitle: {
     fontSize: 14,
     fontFamily: 'Helvetica-Bold',
-    color: '#1e3a5f',
+    color: '#1a1a1a',
     textAlign: 'center',
-    marginVertical: 15,
+    marginTop: 10,
+    marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
+  horizontalLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a1a1a',
+    marginBottom: 12,
+  },
   docSubtitle: {
     fontSize: 10,
-    color: '#666',
-    textAlign: 'center',
+    color: '#444',
+    textAlign: 'justify',
     marginBottom: 10,
+    lineHeight: 1.5,
   },
+
+  /* ─── INFO ROWS ──────────────────────────────────────────── */
   infoRow: {
     flexDirection: 'row',
     marginBottom: 6,
@@ -71,12 +84,18 @@ export const docStyles = StyleSheet.create({
     flex: 1,
     fontSize: 10,
   },
+
+  /* ─── TABLE (FORMAL BORDERS) ─────────────────────────────── */
   table: {
-    marginTop: 15,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#000',
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#1e3a5f',
+    borderWidth: 1,
+    borderColor: '#000',
     paddingVertical: 6,
     paddingHorizontal: 4,
   },
@@ -87,50 +106,79 @@ export const docStyles = StyleSheet.create({
   },
   tableRow: {
     flexDirection: 'row',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#e5e7eb',
+    borderBottomWidth: 1,
+    borderBottomColor: '#000',
     paddingVertical: 5,
     paddingHorizontal: 4,
   },
   tableRowAlt: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#f8f8f8',
   },
   tableCell: {
     fontSize: 8,
-    color: '#374151',
+    color: '#1a1a1a',
+    borderRightWidth: 0.5,
+    borderRightColor: '#000',
   },
+  tableCellLast: {
+    fontSize: 8,
+    color: '#1a1a1a',
+  },
+
+  /* ─── SECTION TITLE ──────────────────────────────────────── */
   sectionTitle: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
-    color: '#1e3a5f',
+    color: '#1a1a1a',
     marginTop: 15,
     marginBottom: 8,
     paddingBottom: 4,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#000',
   },
-  footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 50,
-    right: 50,
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    paddingTop: 10,
+
+  /* ─── OBSERVATIONS ───────────────────────────────────────── */
+  observations: {
+    marginTop: 15,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#000',
+    backgroundColor: '#fafafa',
+  },
+  observationsTitle: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#1a1a1a',
+    marginBottom: 5,
+  },
+  observationsText: {
+    fontSize: 9,
+    color: '#333',
+    lineHeight: 1.4,
+  },
+
+  /* ─── DUAL SIGNATURES (ENTREGA / RECIBE) ─────────────────── */
+  signatureSectionDual: {
+    marginTop: 40,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    fontSize: 8,
-    color: '#9ca3af',
+    paddingHorizontal: 20,
   },
-  signatureSection: {
-    marginTop: 50,
+  signatureBlock: {
+    width: '45%',
     alignItems: 'center',
   },
+  signatureLabel: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#1a1a1a',
+    marginBottom: 30,
+    textTransform: 'uppercase',
+  },
   signatureLine: {
-    width: 250,
+    width: '100%',
     borderTopWidth: 1,
     borderTopColor: '#1a1a1a',
-    marginTop: 50,
     paddingTop: 5,
     alignItems: 'center',
   },
@@ -141,29 +189,33 @@ export const docStyles = StyleSheet.create({
   },
   signatureRole: {
     fontSize: 9,
-    color: '#666',
+    color: '#444',
     textAlign: 'center',
     marginTop: 2,
   },
-  observations: {
-    marginTop: 15,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    borderRadius: 4,
-    backgroundColor: '#f9fafb',
+
+  /* ─── SINGLE SIGNATURE (legacy) ──────────────────────────── */
+  signatureSection: {
+    marginTop: 50,
+    alignItems: 'center',
   },
-  observationsTitle: {
-    fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    color: '#374151',
-    marginBottom: 5,
+
+  /* ─── FOOTER ─────────────────────────────────────────────── */
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 50,
+    right: 50,
+    borderTopWidth: 1,
+    borderTopColor: '#000',
+    paddingTop: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    fontSize: 8,
+    color: '#666',
   },
-  observationsText: {
-    fontSize: 9,
-    color: '#6b7280',
-    lineHeight: 1.4,
-  },
+
+  /* ─── BADGES ─────────────────────────────────────────────── */
   badge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -187,7 +239,7 @@ export const docStyles = StyleSheet.create({
   },
   noData: {
     textAlign: 'center',
-    color: '#9ca3af',
+    color: '#999',
     padding: 30,
     fontSize: 10,
   },

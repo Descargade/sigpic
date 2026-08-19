@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { docStyles } from './styles';
 
 interface BienData {
@@ -33,14 +33,8 @@ interface InventarioPDFProps {
 const colWidths = [50, 50, 45, 95, 60, 50, 50, 35, 60, 60, 65];
 const colHeaders = ['Código', 'Nº Patrim.', 'Nº Serie', 'Nombre', 'Categoría', 'Marca', 'Modelo', 'Cant.', 'Estado Fís.', 'Estado Admin.', 'Dependencia'];
 
-function getEstadoBadgeStyle(estado: string) {
-  if (estado === 'Bueno' || estado === 'En uso') return docStyles.badgeGood;
-  if (estado === 'Regular' || estado === 'En reparación') return docStyles.badgeRegular;
-  return docStyles.badgeBad;
-}
-
 export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion = 'Institución', unidad = 'Unidad' }: InventarioPDFProps) {
-  const fechaStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const fechaStr = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <Document>
@@ -60,6 +54,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
         </View>
 
         <Text style={docStyles.docTitle}>{titulo}</Text>
+        <View style={docStyles.horizontalLine} />
         {subtitulo && <Text style={docStyles.docSubtitle}>{subtitulo}</Text>}
 
         {filtros && Object.keys(filtros).length > 0 && (
@@ -80,25 +75,27 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
         <View style={docStyles.table}>
           <View style={docStyles.tableHeader}>
             {colHeaders.map((h, i) => (
-              <Text key={i} style={[docStyles.tableHeaderText, { width: colWidths[i] }]}>{h}</Text>
+              <Text key={i} style={[docStyles.tableHeaderText, { width: colWidths[i], borderRightWidth: i < colHeaders.length - 1 ? 1 : 0, borderRightColor: '#000' }]}>{h}</Text>
             ))}
           </View>
           {bienes.length === 0 ? (
-            <Text style={docStyles.noData}>No hay bienes para mostrar</Text>
+            <View style={docStyles.tableRow}>
+              <Text style={docStyles.noData}>No hay bienes para mostrar</Text>
+            </View>
           ) : (
             bienes.map((b, idx) => (
               <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                <Text style={[docStyles.tableCell, { width: colWidths[0] }]}>{b.codigoInterno || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[1] }]}>{b.numeroPatrimonial || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[2] }]}>{b.numeroSerie || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[3], fontFamily: 'Helvetica-Bold' }]}>{b.nombre}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[4] }]}>{b.categoriaNombre || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[5] }]}>{b.marca || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[6] }]}>{b.modelo || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[7] }]}>{b.cantidad || 1}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[8] }]}>{b.estadoFisico}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[9] }]}>{b.estadoAdministrativo}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[10] }]}>{b.dependenciaNombre || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[0], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.codigoInterno || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[1], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.numeroPatrimonial || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[2], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.numeroSerie || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[3], borderRightWidth: 1, borderRightColor: '#000', fontFamily: 'Helvetica-Bold' }]}>{b.nombre}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[4], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.categoriaNombre || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[5], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.marca || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[6], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.modelo || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[7], borderRightWidth: 1, borderRightColor: '#000', textAlign: 'center' }]}>{b.cantidad || 1}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[8], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.estadoFisico}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[9], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.estadoAdministrativo}</Text>
+                <Text style={[docStyles.tableCellLast, { width: colWidths[10] }]}>{b.dependenciaNombre || '-'}</Text>
               </View>
             ))
           )}

@@ -36,9 +36,25 @@ interface ActaBajaPDFProps {
   cargoFirmante?: string;
 }
 
+function buildDescripcion(b: BienData): string {
+  const parts: string[] = [];
+  if (b.codigoInterno) parts.push(`Código: ${b.codigoInterno}`);
+  if (b.numeroPatrimonial) parts.push(`Patrimonial: ${b.numeroPatrimonial}`);
+  parts.push(`Nombre: ${b.nombre}`);
+  if (b.marca) parts.push(`Marca: ${b.marca}`);
+  if (b.modelo) parts.push(`Modelo: ${b.modelo}`);
+  if (b.numeroSerie) parts.push(`Serie: ${b.numeroSerie}`);
+  if (b.categoriaNombre) parts.push(`Categoría: ${b.categoriaNombre}`);
+  parts.push(`Estado: ${b.estadoFisico}`);
+  if (b.dependenciaNombre) parts.push(`Dependencia: ${b.dependenciaNombre}`);
+  if (b.responsableNombre) parts.push(`Responsable: ${b.responsableNombre}`);
+  return parts.join('\n');
+}
+
 export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', unidad = 'Unidad', firmante = '________________________________', cargoFirmante = 'Cargo' }: ActaBajaPDFProps) {
-  const fechaStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' });
-  const fechaAltaStr = bien.fechaAlta ? new Date(bien.fechaAlta).toLocaleDateString('es-AR') : 'N/A';
+  const fechaStr = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const horaStr = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  const fechaAltaStr = bien.fechaAlta ? new Date(bien.fechaAlta).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A';
 
   return (
     <Document>
@@ -58,53 +74,24 @@ export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', u
         </View>
 
         <Text style={docStyles.docTitle}>Acta de Baja Patrimonial</Text>
-        <Text style={docStyles.docSubtitle}>Registro de baja definitiva de bien del inventario</Text>
+        <View style={docStyles.horizontalLine} />
 
-        <View style={{ marginTop: 15, padding: 12, borderWidth: 1, borderColor: '#fecaca', borderRadius: 4, backgroundColor: '#fef2f2' }}>
-          <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#991b1b', marginBottom: 8 }}>DATOS DEL BIEN DADO DE BAJA</Text>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Nombre:</Text>
-            <Text style={[docStyles.infoValue, { fontFamily: 'Helvetica-Bold' }]}>{bien.nombre}</Text>
+        <Text style={docStyles.docSubtitle}>
+          En la ciudad de, día {fechaStr}, a las {horaStr} horas, se procede a la baja definitiva del siguiente bien patrimonial, dado de alta el {fechaAltaStr}{bien.origenBien ? `, de origen ${bien.origenBien}` : ''}, por encontrarse en estado que no permite su uso o reparación, de acuerdo con las disposiciones institucionales vigentes.
+        </Text>
+
+        <View style={docStyles.table}>
+          <View style={docStyles.tableHeader}>
+            <Text style={[docStyles.tableHeaderText, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>#</Text>
+            <Text style={[docStyles.tableHeaderText, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>DESCRIPCION</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 50 }]}>CANT.</Text>
           </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Código Interno:</Text>
-            <Text style={docStyles.infoValue}>{bien.codigoInterno || 'Sin código'}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Nº Patrimonial:</Text>
-            <Text style={docStyles.infoValue}>{bien.numeroPatrimonial || 'N/A'}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Nº Serie:</Text>
-            <Text style={docStyles.infoValue}>{bien.numeroSerie || 'N/A'}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Marca / Modelo:</Text>
-            <Text style={docStyles.infoValue}>{bien.marca || '-'} {bien.modelo || ''}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Categoría:</Text>
-            <Text style={docStyles.infoValue}>{bien.categoriaNombre || '-'}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Estado Físico Actual:</Text>
-            <Text style={docStyles.infoValue}>{bien.estadoFisico}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Dependencia:</Text>
-            <Text style={docStyles.infoValue}>{bien.dependenciaNombre || '-'}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Responsable:</Text>
-            <Text style={docStyles.infoValue}>{bien.responsableNombre || '-'}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Fecha de Alta:</Text>
-            <Text style={docStyles.infoValue}>{fechaAltaStr}</Text>
-          </View>
-          <View style={docStyles.infoRow}>
-            <Text style={docStyles.infoLabel}>Origen:</Text>
-            <Text style={docStyles.infoValue}>{bien.origenBien || '-'}</Text>
+          <View style={[docStyles.tableRow, docStyles.tableRowAlt]}>
+            <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>1</Text>
+            <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+              {buildDescripcion(bien)}
+            </Text>
+            <Text style={[docStyles.tableCellLast, { width: 50, textAlign: 'center' }]}>1</Text>
           </View>
         </View>
 
@@ -113,19 +100,19 @@ export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', u
             <Text style={docStyles.sectionTitle}>Historial de Movimientos</Text>
             <View style={docStyles.table}>
               <View style={docStyles.tableHeader}>
-                <Text style={[docStyles.tableHeaderText, { width: 80 }]}>Fecha</Text>
-                <Text style={[docStyles.tableHeaderText, { width: 100 }]}>Tipo</Text>
-                <Text style={[docStyles.tableHeaderText, { width: 200 }]}>Descripción</Text>
+                <Text style={[docStyles.tableHeaderText, { width: 70, borderRightWidth: 1, borderRightColor: '#000' }]}>Fecha</Text>
+                <Text style={[docStyles.tableHeaderText, { width: 90, borderRightWidth: 1, borderRightColor: '#000' }]}>Tipo</Text>
+                <Text style={[docStyles.tableHeaderText, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>Descripción</Text>
                 <Text style={[docStyles.tableHeaderText, { width: 80 }]}>Usuario</Text>
               </View>
               {movimientos.map((m, idx) => (
                 <View key={idx} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                  <Text style={[docStyles.tableCell, { width: 80 }]}>
+                  <Text style={[docStyles.tableCell, { width: 70, borderRightWidth: 1, borderRightColor: '#000' }]}>
                     {new Date(m.fecha).toLocaleDateString('es-AR')}
                   </Text>
-                  <Text style={[docStyles.tableCell, { width: 100, fontFamily: 'Helvetica-Bold' }]}>{m.tipo}</Text>
-                  <Text style={[docStyles.tableCell, { width: 200 }]}>{m.descripcion || '-'}</Text>
-                  <Text style={[docStyles.tableCell, { width: 80 }]}>{m.usuario}</Text>
+                  <Text style={[docStyles.tableCell, { width: 90, borderRightWidth: 1, borderRightColor: '#000', fontFamily: 'Helvetica-Bold' }]}>{m.tipo}</Text>
+                  <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>{m.descripcion || '-'}</Text>
+                  <Text style={[docStyles.tableCellLast, { width: 80 }]}>{m.usuario}</Text>
                 </View>
               ))}
             </View>
@@ -139,10 +126,20 @@ export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', u
           </Text>
         </View>
 
-        <View style={docStyles.signatureSection}>
-          <View style={docStyles.signatureLine}>
-            <Text style={docStyles.signatureName}>{firmante}</Text>
-            <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
+        <View style={docStyles.signatureSectionDual}>
+          <View style={docStyles.signatureBlock}>
+            <Text style={docStyles.signatureLabel}>ENTREGA</Text>
+            <View style={docStyles.signatureLine}>
+              <Text style={docStyles.signatureName}>{firmante}</Text>
+              <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
+            </View>
+          </View>
+          <View style={docStyles.signatureBlock}>
+            <Text style={docStyles.signatureLabel}>RECIBE</Text>
+            <View style={docStyles.signatureLine}>
+              <Text style={docStyles.signatureName}>{bien.responsableNombre || '________________________________'}</Text>
+              <Text style={docStyles.signatureRole}>{bien.dependenciaNombre || ''}</Text>
+            </View>
           </View>
         </View>
 
