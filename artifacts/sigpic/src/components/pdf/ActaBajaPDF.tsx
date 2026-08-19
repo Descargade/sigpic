@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { docStyles } from './styles';
+import { fechaEnLetras, fechaCorta } from './dateUtils';
 
 interface BienData {
   id: number;
@@ -51,10 +52,16 @@ function buildDescripcion(b: BienData): string {
   return parts.join('\n');
 }
 
-export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', unidad = 'Unidad', firmante = '________________________________', cargoFirmante = 'Cargo' }: ActaBajaPDFProps) {
-  const fechaStr = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const horaStr = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-  const fechaAltaStr = bien.fechaAlta ? new Date(bien.fechaAlta).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A';
+export function ActaBajaPDF({
+  bien, movimientos,
+  institucion = 'Institución', unidad = 'Unidad',
+  firmante = '________________________________', cargoFirmante = 'Cargo',
+}: ActaBajaPDFProps) {
+  const ahora = new Date();
+  const fecha = fechaEnLetras(ahora);
+  const fechaAltaStr = bien.fechaAlta ? fechaCorta(new Date(bien.fechaAlta)) : 'N/A';
+
+  const parrafo = `En la Ciudad Autónoma de Buenos Aires, asiento del ${institucion.toUpperCase()}, a los ${fecha.completa}, se labra la presente Acta a fin de dejar constancia de la baja definitiva del siguiente bien patrimonial, dado de alta el ${fechaAltaStr}${bien.origenBien ? `, de origen ${bien.origenBien}` : ''}, por encontrarse en estado que no permite su uso o reparación, conforme al siguiente detalle:`;
 
   return (
     <Document>
@@ -62,13 +69,14 @@ export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', u
         <View style={docStyles.header}>
           <View style={docStyles.headerTop}>
             <View style={docStyles.headerLeft}>
-              <Text style={docStyles.institutionName}>{institucion}</Text>
+              <Text style={docStyles.institutionName}>EJERCITO ARGENTINO</Text>
+              <Text style={docStyles.institutionSiglas}>ISMDDC</Text>
               <Text style={docStyles.systemName}>SIGPIC - Sistema Integral de Gestión Patrimonial</Text>
               <Text style={docStyles.unitName}>{unidad}</Text>
             </View>
             <View style={docStyles.headerRight}>
-              <Text style={{ fontSize: 8, color: '#666' }}>Fecha:</Text>
-              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaStr}</Text>
+              <Text style={{ fontSize: 8, color: '#666' }}>Fecha de emisión:</Text>
+              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaCorta(ahora)}</Text>
             </View>
           </View>
         </View>
@@ -76,9 +84,7 @@ export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', u
         <Text style={docStyles.docTitle}>Acta de Baja Patrimonial</Text>
         <View style={docStyles.horizontalLine} />
 
-        <Text style={docStyles.docSubtitle}>
-          En la ciudad de, día {fechaStr}, a las {horaStr} horas, se procede a la baja definitiva del siguiente bien patrimonial, dado de alta el {fechaAltaStr}{bien.origenBien ? `, de origen ${bien.origenBien}` : ''}, por encontrarse en estado que no permite su uso o reparación, de acuerdo con las disposiciones institucionales vigentes.
-        </Text>
+        <Text style={docStyles.docSubtitle}>{parrafo}</Text>
 
         <View style={docStyles.table}>
           <View style={docStyles.tableHeader}>
@@ -88,10 +94,10 @@ export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', u
           </View>
           <View style={[docStyles.tableRow, docStyles.tableRowAlt]}>
             <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>1</Text>
-            <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+            <Text style={[docStyles.tableCellLeft, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
               {buildDescripcion(bien)}
             </Text>
-            <Text style={[docStyles.tableCellLast, { width: 50, textAlign: 'center' }]}>1</Text>
+            <Text style={[docStyles.tableCellLast, { width: 50 }]}>1</Text>
           </View>
         </View>
 
@@ -111,7 +117,7 @@ export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', u
                     {new Date(m.fecha).toLocaleDateString('es-AR')}
                   </Text>
                   <Text style={[docStyles.tableCell, { width: 90, borderRightWidth: 1, borderRightColor: '#000', fontFamily: 'Helvetica-Bold' }]}>{m.tipo}</Text>
-                  <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>{m.descripcion || '-'}</Text>
+                  <Text style={[docStyles.tableCellLeft, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>{m.descripcion || '-'}</Text>
                   <Text style={[docStyles.tableCellLast, { width: 80 }]}>{m.usuario}</Text>
                 </View>
               ))}
@@ -144,7 +150,7 @@ export function ActaBajaPDF({ bien, movimientos, institucion = 'Institución', u
         </View>
 
         <View style={docStyles.footer}>
-          <Text>SIGPIC - Documento generado el {fechaStr}</Text>
+          <Text>SIGPIC - Documento generado el {fechaCorta(ahora)}</Text>
           <Text>Acta de Baja Patrimonial</Text>
           <Text>Página 1</Text>
         </View>

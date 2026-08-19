@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { docStyles } from './styles';
+import { fechaEnLetras, fechaCorta } from './dateUtils';
 
 interface BienData {
   id: number;
@@ -21,8 +22,10 @@ interface ActaEntregaPDFProps {
   responsableAnterior?: string | null;
   institucion?: string;
   unidad?: string;
-  firmante?: string;
-  cargoFirmante?: string;
+  entregaNombre?: string;
+  entregaCargo?: string;
+  recibeNombre?: string;
+  recibeCargo?: string;
 }
 
 function buildDescripcion(b: BienData): string {
@@ -38,9 +41,16 @@ function buildDescripcion(b: BienData): string {
   return parts.join('\n');
 }
 
-export function ActaEntregaPDF({ bien, responsableAnterior, institucion = 'Institución', unidad = 'Unidad', firmante = '________________________________', cargoFirmante = 'Cargo' }: ActaEntregaPDFProps) {
-  const fechaStr = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const horaStr = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+export function ActaEntregaPDF({
+  bien, responsableAnterior,
+  institucion = 'Institución', unidad = 'Unidad',
+  entregaNombre = '________________________________', entregaCargo = 'Cargo',
+  recibeNombre = '________________________________', recibeCargo = 'Cargo',
+}: ActaEntregaPDFProps) {
+  const ahora = new Date();
+  const fecha = fechaEnLetras(ahora);
+
+  const parrafo = `En la Ciudad Autónoma de Buenos Aires, asiento del ${institucion.toUpperCase()}, a los ${fecha.completa}, se labra la presente Acta a fin de dejar constancia de la entrega del siguiente bien patrimonial${responsableAnterior ? ` por parte de ${responsableAnterior}` : ''}, conforme al siguiente detalle:`;
 
   return (
     <Document>
@@ -48,13 +58,14 @@ export function ActaEntregaPDF({ bien, responsableAnterior, institucion = 'Insti
         <View style={docStyles.header}>
           <View style={docStyles.headerTop}>
             <View style={docStyles.headerLeft}>
-              <Text style={docStyles.institutionName}>{institucion}</Text>
+              <Text style={docStyles.institutionName}>EJERCITO ARGENTINO</Text>
+              <Text style={docStyles.institutionSiglas}>ISMDDC</Text>
               <Text style={docStyles.systemName}>SIGPIC - Sistema Integral de Gestión Patrimonial</Text>
               <Text style={docStyles.unitName}>{unidad}</Text>
             </View>
             <View style={docStyles.headerRight}>
-              <Text style={{ fontSize: 8, color: '#666' }}>Fecha:</Text>
-              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaStr}</Text>
+              <Text style={{ fontSize: 8, color: '#666' }}>Fecha de emisión:</Text>
+              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaCorta(ahora)}</Text>
             </View>
           </View>
         </View>
@@ -62,9 +73,7 @@ export function ActaEntregaPDF({ bien, responsableAnterior, institucion = 'Insti
         <Text style={docStyles.docTitle}>Acta de Entrega y Responsabilidad</Text>
         <View style={docStyles.horizontalLine} />
 
-        <Text style={docStyles.docSubtitle}>
-          En la ciudad de, día {fechaStr}, a las {horaStr} horas, se hace entrega del siguiente bien patrimonial{responsableAnterior ? ` por parte de ${responsableAnterior}` : ''}, el cual pasa a ser responsabilidad del funcionario que recibe. El mismo declara haber recibido el bien en las condiciones descritas en el presente acta.
-        </Text>
+        <Text style={docStyles.docSubtitle}>{parrafo}</Text>
 
         <View style={docStyles.table}>
           <View style={docStyles.tableHeader}>
@@ -74,47 +83,32 @@ export function ActaEntregaPDF({ bien, responsableAnterior, institucion = 'Insti
           </View>
           <View style={[docStyles.tableRow, docStyles.tableRowAlt]}>
             <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>1</Text>
-            <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+            <Text style={[docStyles.tableCellLeft, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
               {buildDescripcion(bien)}
             </Text>
-            <Text style={[docStyles.tableCellLast, { width: 50, textAlign: 'center' }]}>1</Text>
+            <Text style={[docStyles.tableCellLast, { width: 50 }]}>1</Text>
           </View>
-        </View>
-
-        {responsableAnterior && (
-          <View style={{ marginTop: 15, padding: 8, borderWidth: 1, borderColor: '#000', backgroundColor: '#fafafa' }}>
-            <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>ENTREGA DE:</Text>
-            <Text style={{ fontSize: 10 }}>{responsableAnterior}</Text>
-          </View>
-        )}
-
-        <View style={{ marginTop: 10, padding: 8, borderWidth: 1, borderColor: '#000', backgroundColor: '#fafafa' }}>
-          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', marginBottom: 4 }}>RECIBE:</Text>
-          <Text style={{ fontSize: 10 }}>{bien.responsableNombre || 'Sin asignar'}</Text>
-          {bien.dependenciaNombre && (
-            <Text style={{ fontSize: 9, color: '#444', marginTop: 3 }}>Dependencia: {bien.dependenciaNombre}</Text>
-          )}
         </View>
 
         <View style={docStyles.signatureSectionDual}>
           <View style={docStyles.signatureBlock}>
             <Text style={docStyles.signatureLabel}>ENTREGA</Text>
             <View style={docStyles.signatureLine}>
-              <Text style={docStyles.signatureName}>{firmante}</Text>
-              <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
+              <Text style={docStyles.signatureName}>{entregaNombre}</Text>
+              <Text style={docStyles.signatureRole}>{entregaCargo}</Text>
             </View>
           </View>
           <View style={docStyles.signatureBlock}>
             <Text style={docStyles.signatureLabel}>RECIBE</Text>
             <View style={docStyles.signatureLine}>
-              <Text style={docStyles.signatureName}>{bien.responsableNombre || '________________________________'}</Text>
-              <Text style={docStyles.signatureRole}>{bien.dependenciaNombre || ''}</Text>
+              <Text style={docStyles.signatureName}>{recibeNombre}</Text>
+              <Text style={docStyles.signatureRole}>{recibeCargo}</Text>
             </View>
           </View>
         </View>
 
         <View style={docStyles.footer}>
-          <Text>SIGPIC - Documento generado el {fechaStr}</Text>
+          <Text>SIGPIC - Documento generado el {fechaCorta(ahora)}</Text>
           <Text>Acta de Entrega y Responsabilidad</Text>
           <Text>Página 1</Text>
         </View>

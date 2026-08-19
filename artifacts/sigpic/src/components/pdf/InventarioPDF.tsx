@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { docStyles } from './styles';
+import { fechaCorta } from './dateUtils';
 
 interface BienData {
   id: number;
@@ -34,7 +35,7 @@ const colWidths = [50, 50, 45, 95, 60, 50, 50, 35, 60, 60, 65];
 const colHeaders = ['Código', 'Nº Patrim.', 'Nº Serie', 'Nombre', 'Categoría', 'Marca', 'Modelo', 'Cant.', 'Estado Fís.', 'Estado Admin.', 'Dependencia'];
 
 export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion = 'Institución', unidad = 'Unidad' }: InventarioPDFProps) {
-  const fechaStr = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const ahora = new Date();
 
   return (
     <Document>
@@ -42,13 +43,14 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
         <View style={docStyles.header}>
           <View style={docStyles.headerTop}>
             <View style={docStyles.headerLeft}>
-              <Text style={docStyles.institutionName}>{institucion}</Text>
+              <Text style={docStyles.institutionName}>EJERCITO ARGENTINO</Text>
+              <Text style={docStyles.institutionSiglas}>ISMDDC</Text>
               <Text style={docStyles.systemName}>SIGPIC - Sistema Integral de Gestión Patrimonial</Text>
               <Text style={docStyles.unitName}>{unidad}</Text>
             </View>
             <View style={docStyles.headerRight}>
               <Text style={{ fontSize: 8, color: '#666' }}>Fecha de emisión:</Text>
-              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaStr}</Text>
+              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaCorta(ahora)}</Text>
             </View>
           </View>
         </View>
@@ -92,7 +94,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
                 <Text style={[docStyles.tableCell, { width: colWidths[4], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.categoriaNombre || '-'}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[5], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.marca || '-'}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[6], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.modelo || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[7], borderRightWidth: 1, borderRightColor: '#000', textAlign: 'center' }]}>{b.cantidad || 1}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[7], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.cantidad || 1}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[8], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.estadoFisico}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[9], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.estadoAdministrativo}</Text>
                 <Text style={[docStyles.tableCellLast, { width: colWidths[10] }]}>{b.dependenciaNombre || '-'}</Text>
@@ -102,7 +104,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
         </View>
 
         <View style={docStyles.footer}>
-          <Text>SIGPIC - Generado el {fechaStr}</Text>
+          <Text>SIGPIC - Generado el {fechaCorta(ahora)}</Text>
           <Text>Página 1</Text>
           <Text>Total: {bienes.length} bien(es)</Text>
         </View>

@@ -45,6 +45,10 @@ export default function Documentos() {
   const [selectedBien, setSelectedBien] = useState<string>('');
   const [firmante, setFirmante] = useState<string>('');
   const [cargoFirmante, setCargoFirmante] = useState<string>('');
+  const [entregaNombre, setEntregaNombre] = useState<string>('');
+  const [entregaCargo, setEntregaCargo] = useState<string>('');
+  const [recibeNombre, setRecibeNombre] = useState<string>('');
+  const [recibeCargo, setRecibeCargo] = useState<string>('');
   const [previewDoc, setPreviewDoc] = useState<any>(null);
   const [movimientosBien, setMovimientosBien] = useState<any[]>([]);
   const [responsableAnterior, setResponsableAnterior] = useState<string | null>(null);
@@ -397,6 +401,31 @@ export default function Documentos() {
                 </div>
               )}
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                <div className="space-y-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">ENTREGA</p>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Nombre completo</label>
+                    <Input placeholder="Nombre de quien entrega" value={entregaNombre} onChange={(e) => setEntregaNombre(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Cargo</label>
+                    <Input placeholder="Cargo de quien entrega" value={entregaCargo} onChange={(e) => setEntregaCargo(e.target.value)} />
+                  </div>
+                </div>
+                <div className="space-y-3 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+                  <p className="text-sm font-semibold text-green-700 dark:text-green-300">RECIBE</p>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Nombre completo</label>
+                    <Input placeholder="Nombre de quien recibe" value={recibeNombre} onChange={(e) => setRecibeNombre(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground">Cargo</label>
+                    <Input placeholder="Cargo de quien recibe" value={recibeCargo} onChange={(e) => setRecibeCargo(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex gap-3 pt-4 border-t">
                 <Button
                   disabled={!selectedBien}
@@ -408,8 +437,10 @@ export default function Documentos() {
                         responsableAnterior={responsableAnterior}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
-                        firmante={firmante || '________________________________'}
-                        cargoFirmante={cargoFirmante || 'Cargo'}
+                        entregaNombre={entregaNombre || '________________________________'}
+                        entregaCargo={entregaCargo || 'Cargo'}
+                        recibeNombre={recibeNombre || '________________________________'}
+                        recibeCargo={recibeCargo || 'Cargo'}
                       />
                     );
                   }}
@@ -427,8 +458,10 @@ export default function Documentos() {
                         responsableAnterior={responsableAnterior}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
-                        firmante={firmante || '________________________________'}
-                        cargoFirmante={cargoFirmante || 'Cargo'}
+                        entregaNombre={entregaNombre || '________________________________'}
+                        entregaCargo={entregaCargo || 'Cargo'}
+                        recibeNombre={recibeNombre || '________________________________'}
+                        recibeCargo={recibeCargo || 'Cargo'}
                       />
                     }
                     fileName={`SIGPIC_ActaEntrega_${bienSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`}

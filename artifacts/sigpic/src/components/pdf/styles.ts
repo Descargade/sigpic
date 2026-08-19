@@ -24,17 +24,23 @@ export const docStyles = StyleSheet.create({
     flex: 1,
   },
   headerRight: {
-    width: 120,
+    width: 140,
     alignItems: 'flex-end',
   },
   institutionName: {
     fontSize: 16,
     fontFamily: 'Helvetica-Bold',
     color: '#1e3a5f',
-    marginBottom: 4,
+    marginBottom: 2,
+  },
+  institutionSiglas: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    color: '#1e3a5f',
+    marginBottom: 2,
   },
   systemName: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Helvetica-Bold',
     color: '#2563eb',
     marginBottom: 2,
@@ -62,9 +68,9 @@ export const docStyles = StyleSheet.create({
   },
   docSubtitle: {
     fontSize: 10,
-    color: '#444',
+    color: '#333',
     textAlign: 'justify',
-    marginBottom: 10,
+    marginBottom: 12,
     lineHeight: 1.5,
   },
 
@@ -85,7 +91,7 @@ export const docStyles = StyleSheet.create({
     fontSize: 10,
   },
 
-  /* ─── TABLE (FORMAL BORDERS) ─────────────────────────────── */
+  /* ─── TABLE (FORMAL BORDERS + CENTERED) ──────────────────── */
   table: {
     marginTop: 10,
     borderWidth: 1,
@@ -103,6 +109,8 @@ export const docStyles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
+    textAlign: 'center',
+    justifyContent: 'center',
   },
   tableRow: {
     flexDirection: 'row',
@@ -119,10 +127,22 @@ export const docStyles = StyleSheet.create({
     color: '#1a1a1a',
     borderRightWidth: 0.5,
     borderRightColor: '#000',
+    textAlign: 'center',
+    justifyContent: 'center',
+  },
+  tableCellLeft: {
+    fontSize: 8,
+    color: '#1a1a1a',
+    borderRightWidth: 0.5,
+    borderRightColor: '#000',
+    textAlign: 'left',
+    justifyContent: 'center',
   },
   tableCellLast: {
     fontSize: 8,
     color: '#1a1a1a',
+    textAlign: 'center',
+    justifyContent: 'center',
   },
 
   /* ─── SECTION TITLE ──────────────────────────────────────── */

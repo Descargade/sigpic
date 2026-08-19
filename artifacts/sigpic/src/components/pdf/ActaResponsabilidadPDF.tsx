@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { docStyles } from './styles';
+import { fechaEnLetras, fechaCorta } from './dateUtils';
 
 interface ResponsableData {
   nombre: string;
@@ -43,9 +44,17 @@ function buildDescripcion(b: BienData): string {
   return parts.join('\n');
 }
 
-export function ActaResponsabilidadPDF({ responsable, bienes, institucion = 'Institución', unidad = 'Unidad', firmante = '________________________________', cargoFirmante = 'Cargo' }: ActaResponsabilidadPDFProps) {
-  const fechaStr = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const horaStr = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+export function ActaResponsabilidadPDF({
+  responsable, bienes,
+  institucion = 'Institución', unidad = 'Unidad',
+  firmante = '________________________________', cargoFirmante = 'Cargo',
+}: ActaResponsabilidadPDFProps) {
+  const ahora = new Date();
+  const fecha = fechaEnLetras(ahora);
+
+  const cargoDesc = responsable.cargo ? `, ${responsable.cargo}` : '';
+  const depDesc = responsable.dependenciaNombre ? ` de la dependencia ${responsable.dependenciaNombre}` : '';
+  const parrafo = `En la Ciudad Autónoma de Buenos Aires, asiento del ${institucion.toUpperCase()}, a los ${fecha.completa}, se labra la presente Acta a fin de dejar constancia de la asignación de los siguientes bienes patrimoniales por parte de ${responsable.nombre}${cargoDesc}${depDesc}, conforme al siguiente detalle:`;
 
   return (
     <Document>
@@ -53,13 +62,14 @@ export function ActaResponsabilidadPDF({ responsable, bienes, institucion = 'Ins
         <View style={docStyles.header}>
           <View style={docStyles.headerTop}>
             <View style={docStyles.headerLeft}>
-              <Text style={docStyles.institutionName}>{institucion}</Text>
+              <Text style={docStyles.institutionName}>EJERCITO ARGENTINO</Text>
+              <Text style={docStyles.institutionSiglas}>ISMDDC</Text>
               <Text style={docStyles.systemName}>SIGPIC - Sistema Integral de Gestión Patrimonial</Text>
               <Text style={docStyles.unitName}>{unidad}</Text>
             </View>
             <View style={docStyles.headerRight}>
-              <Text style={{ fontSize: 8, color: '#666' }}>Fecha:</Text>
-              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaStr}</Text>
+              <Text style={{ fontSize: 8, color: '#666' }}>Fecha de emisión:</Text>
+              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaCorta(ahora)}</Text>
             </View>
           </View>
         </View>
@@ -67,9 +77,7 @@ export function ActaResponsabilidadPDF({ responsable, bienes, institucion = 'Ins
         <Text style={docStyles.docTitle}>Acta de Responsabilidad</Text>
         <View style={docStyles.horizontalLine} />
 
-        <Text style={docStyles.docSubtitle}>
-          El/La suscribiente, {responsable.nombre}{responsable.cargo ? `, ${responsable.cargo}` : ''}{responsable.dependenciaNombre ? ` de la dependencia ${responsable.dependenciaNombre}` : ''}, declara tener a su cargo y responsabilidad los siguientes bienes patrimoniales, comprometiéndose a mantenerlos en las condiciones en que se encuentran, a utilizarlos exclusivamente para los fines propios de la institución y a comunicar cualquier novedad que afecte su integridad.
-        </Text>
+        <Text style={docStyles.docSubtitle}>{parrafo}</Text>
 
         <View style={docStyles.table}>
           <View style={docStyles.tableHeader}>
@@ -85,10 +93,10 @@ export function ActaResponsabilidadPDF({ responsable, bienes, institucion = 'Ins
             bienes.map((b, idx) => (
               <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
                 <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>{idx + 1}</Text>
-                <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+                <Text style={[docStyles.tableCellLeft, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
                   {buildDescripcion(b)}
                 </Text>
-                <Text style={[docStyles.tableCellLast, { width: 50, textAlign: 'center' }]}>1</Text>
+                <Text style={[docStyles.tableCellLast, { width: 50 }]}>1</Text>
               </View>
             ))
           )}
@@ -112,7 +120,7 @@ export function ActaResponsabilidadPDF({ responsable, bienes, institucion = 'Ins
         </View>
 
         <View style={docStyles.footer}>
-          <Text>SIGPIC - Documento generado el {fechaStr}</Text>
+          <Text>SIGPIC - Documento generado el {fechaCorta(ahora)}</Text>
           <Text>Acta de Responsabilidad</Text>
           <Text>Página 1</Text>
         </View>
