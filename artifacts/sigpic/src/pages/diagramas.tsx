@@ -470,8 +470,8 @@ function GrupoNode({ data, id }: { data: any; id: string }) {
       <div className="rounded-xl shadow-lg border border-black/5 transition-all hover:shadow-xl" style={{ background: COLORS.grupo.bg, width: NODE_W }}>
         <div
           className="w-full flex items-center gap-2 px-3 py-2.5 cursor-pointer select-none text-left"
-          onClick={(e) => { e.stopPropagation(); data.__onToggle?.(id); }}
-          onPointerDown={(e) => { e.stopPropagation(); }}
+          onClick={() => data.__onToggle?.(id)}
+          onPointerDown={(e) => e.stopPropagation()}
         >
           <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
             <Layers className="w-4 h-4 text-white" />
