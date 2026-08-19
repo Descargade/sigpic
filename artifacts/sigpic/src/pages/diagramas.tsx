@@ -470,6 +470,7 @@ function GrupoNode({ data, id }: { data: any; id: string }) {
       <div className="rounded-xl shadow-lg border border-black/5 transition-all hover:shadow-xl" style={{ background: COLORS.grupo.bg, width: NODE_W }}>
         <div
           className="w-full flex items-center gap-2 px-3 py-2.5 cursor-pointer select-none text-left"
+          onClick={(e) => { e.stopPropagation(); data.__onToggle?.(id); }}
         >
           <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
             <Layers className="w-4 h-4 text-white" />
@@ -504,6 +505,14 @@ function GrupoNode({ data, id }: { data: any; id: string }) {
     </div>
   );
 }
+
+const nodeTypes = {
+  institucion: InstitucionNode,
+  edificio: EdificioNode,
+  responsable: ResponsableNode,
+  dependencia: DependenciaNode,
+  grupo: GrupoNode,
+};
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LEGEND
@@ -717,11 +726,10 @@ function DiagramInner({
     }
   }, [editMode, selectedEdge]);
 
-  const onNodeClick = useCallback((_: any, node: Node) => {
-    if (node.type === 'grupo') {
-      toggleGroup(node.id);
-    }
-  }, [toggleGroup]);
+  const onNodeClick = useCallback((_: any, _node: Node) => {
+    // Grupo nodes handle click via their own onClick handler with e.stopPropagation().
+    // ReactFlow v11 onNodeClick does NOT fire for custom node types (#2830).
+  }, []);
 
   const onConnect = useCallback((connection: any) => {
     setEdges(eds => {
@@ -830,13 +838,7 @@ function DiagramInner({
           onEdgeClick={onEdgeClick}
           onNodeClick={onNodeClick}
           onConnect={editMode ? onConnect : undefined}
-          nodeTypes={{
-            institucion: InstitucionNode,
-            edificio: EdificioNode,
-            responsable: ResponsableNode,
-            dependencia: DependenciaNode,
-            grupo: GrupoNode,
-          }}
+          nodeTypes={nodeTypes}
           defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
           fitView
           fitViewOptions={{ padding: 0.15 }}
