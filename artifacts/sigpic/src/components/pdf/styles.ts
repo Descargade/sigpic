@@ -4,15 +4,15 @@ export const docStyles = StyleSheet.create({
   page: {
     padding: '40 50',
     fontSize: 10,
-    fontFamily: 'Helvetica',
-    color: '#1a1a1a',
+    fontFamily: 'Times-Roman',
+    color: '#000',
   },
 
   /* ─── HEADER ──────────────────────────────────────────────── */
   header: {
     marginBottom: 20,
     borderBottomWidth: 2,
-    borderBottomColor: '#1e3a5f',
+    borderBottomColor: '#000',
     paddingBottom: 15,
   },
   headerTop: {
@@ -29,32 +29,32 @@ export const docStyles = StyleSheet.create({
   },
   institutionName: {
     fontSize: 16,
-    fontFamily: 'Helvetica-Bold',
-    color: '#1e3a5f',
+    fontFamily: 'Times-Bold',
+    color: '#000',
     marginBottom: 2,
   },
   institutionSiglas: {
     fontSize: 11,
-    fontFamily: 'Helvetica-Bold',
-    color: '#1e3a5f',
+    fontFamily: 'Times-Bold',
+    color: '#000',
     marginBottom: 2,
   },
   systemName: {
     fontSize: 10,
-    fontFamily: 'Helvetica-Bold',
-    color: '#2563eb',
+    fontFamily: 'Times-Bold',
+    color: '#000',
     marginBottom: 2,
   },
   unitName: {
     fontSize: 9,
-    color: '#666',
+    color: '#000',
   },
 
   /* ─── TITLE (ACTA FORMAT) ────────────────────────────────── */
   docTitle: {
     fontSize: 14,
-    fontFamily: 'Helvetica-Bold',
-    color: '#1a1a1a',
+    fontFamily: 'Times-Bold',
+    color: '#000',
     textAlign: 'center',
     marginTop: 10,
     marginBottom: 4,
@@ -63,12 +63,12 @@ export const docStyles = StyleSheet.create({
   },
   horizontalLine: {
     borderBottomWidth: 1,
-    borderBottomColor: '#1a1a1a',
+    borderBottomColor: '#000',
     marginBottom: 12,
   },
   docSubtitle: {
     fontSize: 10,
-    color: '#333',
+    color: '#000',
     textAlign: 'justify',
     marginBottom: 12,
     lineHeight: 1.5,
@@ -83,8 +83,8 @@ export const docStyles = StyleSheet.create({
   infoLabel: {
     width: 140,
     fontSize: 9,
-    color: '#666',
-    fontFamily: 'Helvetica-Bold',
+    color: '#000',
+    fontFamily: 'Times-Bold',
   },
   infoValue: {
     flex: 1,
@@ -99,16 +99,16 @@ export const docStyles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#1e3a5f',
+    backgroundColor: '#000',
     borderWidth: 1,
     borderColor: '#000',
     paddingVertical: 6,
     paddingHorizontal: 4,
   },
   tableHeaderText: {
-    color: '#ffffff',
+    color: '#fff',
     fontSize: 8,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Times-Bold',
     textAlign: 'center',
     justifyContent: 'center',
   },
@@ -120,11 +120,11 @@ export const docStyles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   tableRowAlt: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#f0f0f0',
   },
   tableCell: {
     fontSize: 8,
-    color: '#1a1a1a',
+    color: '#000',
     borderRightWidth: 0.5,
     borderRightColor: '#000',
     textAlign: 'center',
@@ -132,7 +132,7 @@ export const docStyles = StyleSheet.create({
   },
   tableCellLeft: {
     fontSize: 8,
-    color: '#1a1a1a',
+    color: '#000',
     borderRightWidth: 0.5,
     borderRightColor: '#000',
     textAlign: 'left',
@@ -140,7 +140,7 @@ export const docStyles = StyleSheet.create({
   },
   tableCellLast: {
     fontSize: 8,
-    color: '#1a1a1a',
+    color: '#000',
     textAlign: 'center',
     justifyContent: 'center',
   },
@@ -148,8 +148,8 @@ export const docStyles = StyleSheet.create({
   /* ─── SECTION TITLE ──────────────────────────────────────── */
   sectionTitle: {
     fontSize: 11,
-    fontFamily: 'Helvetica-Bold',
-    color: '#1a1a1a',
+    fontFamily: 'Times-Bold',
+    color: '#000',
     marginTop: 15,
     marginBottom: 8,
     paddingBottom: 4,
@@ -163,53 +163,53 @@ export const docStyles = StyleSheet.create({
     padding: 10,
     borderWidth: 1,
     borderColor: '#000',
-    backgroundColor: '#fafafa',
   },
   observationsTitle: {
     fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    color: '#1a1a1a',
+    fontFamily: 'Times-Bold',
+    color: '#000',
     marginBottom: 5,
   },
   observationsText: {
     fontSize: 9,
-    color: '#333',
+    color: '#000',
     lineHeight: 1.4,
   },
 
-  /* ─── DUAL SIGNATURES (ENTREGA / RECIBE) ─────────────────── */
+  /* ─── DUAL SIGNATURES (ENTREGUÉ / RECIBÍ CONFORME) ──────── */
   signatureSectionDual: {
-    marginTop: 40,
+    marginTop: 50,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   signatureBlock: {
     width: '45%',
     alignItems: 'center',
   },
-  signatureLabel: {
-    fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    color: '#1a1a1a',
-    marginBottom: 30,
-    textTransform: 'uppercase',
+  signatureLineAbove: {
+    width: 200,
+    borderBottomWidth: 1,
+    borderBottomColor: '#000',
+    marginBottom: 5,
   },
-  signatureLine: {
-    width: '100%',
-    borderTopWidth: 1,
-    borderTopColor: '#1a1a1a',
-    paddingTop: 5,
-    alignItems: 'center',
+  signatureLabel: {
+    fontSize: 10,
+    fontFamily: 'Times-Bold',
+    color: '#000',
+    marginTop: 25,
+    marginBottom: 3,
+    textTransform: 'uppercase',
   },
   signatureName: {
     fontSize: 10,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Times-Bold',
     textAlign: 'center',
+    color: '#000',
   },
   signatureRole: {
     fontSize: 9,
-    color: '#444',
+    color: '#000',
     textAlign: 'center',
     marginTop: 2,
   },
@@ -217,6 +217,13 @@ export const docStyles = StyleSheet.create({
   /* ─── SINGLE SIGNATURE (legacy) ──────────────────────────── */
   signatureSection: {
     marginTop: 50,
+    alignItems: 'center',
+  },
+  signatureLine: {
+    width: 200,
+    borderBottomWidth: 1,
+    borderBottomColor: '#000',
+    paddingTop: 5,
     alignItems: 'center',
   },
 
@@ -232,7 +239,7 @@ export const docStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     fontSize: 8,
-    color: '#666',
+    color: '#000',
   },
 
   /* ─── BADGES ─────────────────────────────────────────────── */
@@ -241,25 +248,26 @@ export const docStyles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 3,
     fontSize: 7,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Times-Bold',
     textAlign: 'center',
+    borderWidth: 1,
+    borderColor: '#000',
+    color: '#000',
   },
-  badgeGood: { backgroundColor: '#dcfce7', color: '#166534' },
-  badgeRegular: { backgroundColor: '#fef9c3', color: '#854d0e' },
-  badgeBad: { backgroundColor: '#fee2e2', color: '#991b1b' },
   countBadge: {
-    backgroundColor: '#dbeafe',
-    color: '#1e40af',
+    borderWidth: 1,
+    borderColor: '#000',
+    color: '#000',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
     fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Times-Bold',
     textAlign: 'center',
   },
   noData: {
     textAlign: 'center',
-    color: '#999',
+    color: '#000',
     padding: 30,
     fontSize: 10,
   },

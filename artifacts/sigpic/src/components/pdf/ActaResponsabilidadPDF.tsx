@@ -68,8 +68,8 @@ export function ActaResponsabilidadPDF({
               <Text style={docStyles.unitName}>{unidad}</Text>
             </View>
             <View style={docStyles.headerRight}>
-              <Text style={{ fontSize: 8, color: '#666' }}>Fecha de emisión:</Text>
-              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaCorta(ahora)}</Text>
+              <Text style={{ fontSize: 8, color: '#000' }}>Fecha de emisión:</Text>
+              <Text style={{ fontSize: 9, fontFamily: 'Times-Bold' }}>{fechaCorta(ahora)}</Text>
             </View>
           </View>
         </View>
@@ -93,7 +93,7 @@ export function ActaResponsabilidadPDF({
             bienes.map((b, idx) => (
               <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
                 <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>{idx + 1}</Text>
-                <Text style={[docStyles.tableCellLeft, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+                <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
                   {buildDescripcion(b)}
                 </Text>
                 <Text style={[docStyles.tableCellLast, { width: 50 }]}>1</Text>
@@ -104,18 +104,16 @@ export function ActaResponsabilidadPDF({
 
         <View style={docStyles.signatureSectionDual}>
           <View style={docStyles.signatureBlock}>
-            <Text style={docStyles.signatureLabel}>ENTREGA</Text>
-            <View style={docStyles.signatureLine}>
-              <Text style={docStyles.signatureName}>{firmante}</Text>
-              <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
-            </View>
+            <View style={docStyles.signatureLineAbove} />
+            <Text style={docStyles.signatureLabel}>ENTREGUÉ CONFORME</Text>
+            <Text style={docStyles.signatureName}>{firmante}</Text>
+            <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
           </View>
           <View style={docStyles.signatureBlock}>
-            <Text style={docStyles.signatureLabel}>RECIBE</Text>
-            <View style={docStyles.signatureLine}>
-              <Text style={docStyles.signatureName}>{responsable.nombre}</Text>
-              <Text style={docStyles.signatureRole}>{responsable.cargo || responsable.dependenciaNombre || ''}</Text>
-            </View>
+            <View style={docStyles.signatureLineAbove} />
+            <Text style={docStyles.signatureLabel}>RECIBÍ CONFORME</Text>
+            <Text style={docStyles.signatureName}>{responsable.nombre}</Text>
+            <Text style={docStyles.signatureRole}>{responsable.cargo || responsable.dependenciaNombre || ''}</Text>
           </View>
         </View>
 

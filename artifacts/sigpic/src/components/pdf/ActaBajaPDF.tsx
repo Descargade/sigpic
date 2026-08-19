@@ -75,8 +75,8 @@ export function ActaBajaPDF({
               <Text style={docStyles.unitName}>{unidad}</Text>
             </View>
             <View style={docStyles.headerRight}>
-              <Text style={{ fontSize: 8, color: '#666' }}>Fecha de emisión:</Text>
-              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaCorta(ahora)}</Text>
+              <Text style={{ fontSize: 8, color: '#000' }}>Fecha de emisión:</Text>
+              <Text style={{ fontSize: 9, fontFamily: 'Times-Bold' }}>{fechaCorta(ahora)}</Text>
             </View>
           </View>
         </View>
@@ -94,7 +94,7 @@ export function ActaBajaPDF({
           </View>
           <View style={[docStyles.tableRow, docStyles.tableRowAlt]}>
             <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>1</Text>
-            <Text style={[docStyles.tableCellLeft, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+            <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
               {buildDescripcion(bien)}
             </Text>
             <Text style={[docStyles.tableCellLast, { width: 50 }]}>1</Text>
@@ -116,8 +116,8 @@ export function ActaBajaPDF({
                   <Text style={[docStyles.tableCell, { width: 70, borderRightWidth: 1, borderRightColor: '#000' }]}>
                     {new Date(m.fecha).toLocaleDateString('es-AR')}
                   </Text>
-                  <Text style={[docStyles.tableCell, { width: 90, borderRightWidth: 1, borderRightColor: '#000', fontFamily: 'Helvetica-Bold' }]}>{m.tipo}</Text>
-                  <Text style={[docStyles.tableCellLeft, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>{m.descripcion || '-'}</Text>
+                  <Text style={[docStyles.tableCell, { width: 90, borderRightWidth: 1, borderRightColor: '#000', fontFamily: 'Times-Bold' }]}>{m.tipo}</Text>
+                  <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>{m.descripcion || '-'}</Text>
                   <Text style={[docStyles.tableCellLast, { width: 80 }]}>{m.usuario}</Text>
                 </View>
               ))}
@@ -134,18 +134,16 @@ export function ActaBajaPDF({
 
         <View style={docStyles.signatureSectionDual}>
           <View style={docStyles.signatureBlock}>
-            <Text style={docStyles.signatureLabel}>ENTREGA</Text>
-            <View style={docStyles.signatureLine}>
-              <Text style={docStyles.signatureName}>{firmante}</Text>
-              <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
-            </View>
+            <View style={docStyles.signatureLineAbove} />
+            <Text style={docStyles.signatureLabel}>ENTREGUÉ CONFORME</Text>
+            <Text style={docStyles.signatureName}>{firmante}</Text>
+            <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
           </View>
           <View style={docStyles.signatureBlock}>
-            <Text style={docStyles.signatureLabel}>RECIBE</Text>
-            <View style={docStyles.signatureLine}>
-              <Text style={docStyles.signatureName}>{bien.responsableNombre || '________________________________'}</Text>
-              <Text style={docStyles.signatureRole}>{bien.dependenciaNombre || ''}</Text>
-            </View>
+            <View style={docStyles.signatureLineAbove} />
+            <Text style={docStyles.signatureLabel}>RECIBÍ CONFORME</Text>
+            <Text style={docStyles.signatureName}>{bien.responsableNombre || '________________________________'}</Text>
+            <Text style={docStyles.signatureRole}>{bien.dependenciaNombre || ''}</Text>
           </View>
         </View>
 

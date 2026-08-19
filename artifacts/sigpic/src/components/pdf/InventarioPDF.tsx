@@ -49,8 +49,8 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
               <Text style={docStyles.unitName}>{unidad}</Text>
             </View>
             <View style={docStyles.headerRight}>
-              <Text style={{ fontSize: 8, color: '#666' }}>Fecha de emisión:</Text>
-              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaCorta(ahora)}</Text>
+              <Text style={{ fontSize: 8, color: '#000' }}>Fecha de emisión:</Text>
+              <Text style={{ fontSize: 9, fontFamily: 'Times-Bold' }}>{fechaCorta(ahora)}</Text>
             </View>
           </View>
         </View>
@@ -63,8 +63,8 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
           <View style={{ marginBottom: 10, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {Object.entries(filtros).map(([key, value]) => (
               <View key={key} style={{ flexDirection: 'row', marginRight: 15 }}>
-                <Text style={{ fontSize: 8, color: '#666' }}>{key}: </Text>
-                <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold' }}>{value}</Text>
+                <Text style={{ fontSize: 8, color: '#000' }}>{key}: </Text>
+                <Text style={{ fontSize: 8, fontFamily: 'Times-Bold' }}>{value}</Text>
               </View>
             ))}
           </View>
@@ -90,7 +90,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
                 <Text style={[docStyles.tableCell, { width: colWidths[0], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.codigoInterno || '-'}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[1], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.numeroPatrimonial || '-'}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[2], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.numeroSerie || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[3], borderRightWidth: 1, borderRightColor: '#000', fontFamily: 'Helvetica-Bold' }]}>{b.nombre}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[3], borderRightWidth: 1, borderRightColor: '#000', fontFamily: 'Times-Bold' }]}>{b.nombre}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[4], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.categoriaNombre || '-'}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[5], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.marca || '-'}</Text>
                 <Text style={[docStyles.tableCell, { width: colWidths[6], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.modelo || '-'}</Text>

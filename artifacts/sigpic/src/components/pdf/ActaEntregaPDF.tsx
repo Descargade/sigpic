@@ -64,8 +64,8 @@ export function ActaEntregaPDF({
               <Text style={docStyles.unitName}>{unidad}</Text>
             </View>
             <View style={docStyles.headerRight}>
-              <Text style={{ fontSize: 8, color: '#666' }}>Fecha de emisión:</Text>
-              <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{fechaCorta(ahora)}</Text>
+              <Text style={{ fontSize: 8, color: '#000' }}>Fecha de emisión:</Text>
+              <Text style={{ fontSize: 9, fontFamily: 'Times-Bold' }}>{fechaCorta(ahora)}</Text>
             </View>
           </View>
         </View>
@@ -83,7 +83,7 @@ export function ActaEntregaPDF({
           </View>
           <View style={[docStyles.tableRow, docStyles.tableRowAlt]}>
             <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>1</Text>
-            <Text style={[docStyles.tableCellLeft, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+            <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
               {buildDescripcion(bien)}
             </Text>
             <Text style={[docStyles.tableCellLast, { width: 50 }]}>1</Text>
@@ -92,18 +92,16 @@ export function ActaEntregaPDF({
 
         <View style={docStyles.signatureSectionDual}>
           <View style={docStyles.signatureBlock}>
-            <Text style={docStyles.signatureLabel}>ENTREGA</Text>
-            <View style={docStyles.signatureLine}>
-              <Text style={docStyles.signatureName}>{entregaNombre}</Text>
-              <Text style={docStyles.signatureRole}>{entregaCargo}</Text>
-            </View>
+            <View style={docStyles.signatureLineAbove} />
+            <Text style={docStyles.signatureLabel}>ENTREGUÉ CONFORME</Text>
+            <Text style={docStyles.signatureName}>{entregaNombre}</Text>
+            <Text style={docStyles.signatureRole}>{entregaCargo}</Text>
           </View>
           <View style={docStyles.signatureBlock}>
-            <Text style={docStyles.signatureLabel}>RECIBE</Text>
-            <View style={docStyles.signatureLine}>
-              <Text style={docStyles.signatureName}>{recibeNombre}</Text>
-              <Text style={docStyles.signatureRole}>{recibeCargo}</Text>
-            </View>
+            <View style={docStyles.signatureLineAbove} />
+            <Text style={docStyles.signatureLabel}>RECIBÍ CONFORME</Text>
+            <Text style={docStyles.signatureName}>{recibeNombre}</Text>
+            <Text style={docStyles.signatureRole}>{recibeCargo}</Text>
           </View>
         </View>
 
