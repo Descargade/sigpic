@@ -44,6 +44,7 @@ export default function Documentos() {
   const [selectedCategoria, setSelectedCategoria] = useState<string>('');
   const [selectedBien, setSelectedBien] = useState<string>('');
   const [selectedBienes, setSelectedBienes] = useState<string[]>([]);
+  const [selectedEntregaResponsable, setSelectedEntregaResponsable] = useState<string>('');
   const [entregaNombre, setEntregaNombre] = useState<string>('');
   const [entregaCargo, setEntregaCargo] = useState<string>('');
   const [recibeNombre, setRecibeNombre] = useState<string>('');
@@ -66,6 +67,10 @@ export default function Documentos() {
   const bienSeleccionado = allBienes?.find(b => b.id === parseInt(selectedBien || '0'));
   const bienesSeleccionados = bienesFiltrados.filter(b => selectedBienes.includes(b.id.toString()));
   const responsableSeleccionado = responsables?.find(r => r.id === parseInt(selectedResponsable || '0'));
+  const entregaResponsableSeleccionado = responsables?.find(r => r.id === parseInt(selectedEntregaResponsable || '0'));
+  const bienesEntrega = selectedEntregaResponsable
+    ? bienesFiltrados.filter(b => b.responsableId === parseInt(selectedEntregaResponsable))
+    : [];
 
   const toggleBien = (id: string) => {
     setSelectedBienes(prev =>
@@ -74,10 +79,10 @@ export default function Documentos() {
   };
 
   const toggleAllBienes = () => {
-    if (selectedBienes.length === bienesFiltrados.length) {
+    if (selectedBienes.length === bienesEntrega.length) {
       setSelectedBienes([]);
     } else {
-      setSelectedBienes(bienesFiltrados.map(b => b.id.toString()));
+      setSelectedBienes(bienesEntrega.map(b => b.id.toString()));
     }
   };
 
@@ -360,42 +365,72 @@ export default function Documentos() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-muted-foreground flex items-center">
-                    <Package className="w-4 h-4 mr-1.5" />
-                    Bienes a transferir ({selectedBienes.length} seleccionados)
-                  </label>
-                  <Button variant="ghost" size="sm" onClick={toggleAllBienes} className="text-xs h-7">
-                    {selectedBienes.length === bienesFiltrados.length ? 'Limpiar' : 'Seleccionar todos'}
-                  </Button>
-                </div>
-                <div className="border rounded-lg max-h-[300px] overflow-y-auto">
-                  {bienesFiltrados.length === 0 ? (
-                    <div className="p-4 text-sm text-muted-foreground text-center">No hay bienes disponibles</div>
-                  ) : (
-                    <div className="divide-y">
-                      {bienesFiltrados.map(b => (
-                        <label
-                          key={b.id}
-                          className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 cursor-pointer text-sm"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedBienes.includes(b.id.toString())}
-                            onChange={() => toggleBien(b.id.toString())}
-                            className="rounded border-gray-300"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <span className="font-medium">{b.nombre}</span>
-                            <span className="text-muted-foreground ml-2">({b.codigoInterno || b.numeroPatrimonial || 'S/N'})</span>
-                          </div>
-                          <span className="text-xs text-muted-foreground shrink-0">{b.dependenciaNombre || '-'}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <label className="text-sm font-medium text-muted-foreground flex items-center">
+                  <User className="w-4 h-4 mr-1.5" />
+                  Responsable que entrega
+                </label>
+                <Select
+                  value={selectedEntregaResponsable}
+                  onValueChange={(v) => {
+                    setSelectedEntregaResponsable(v);
+                    setSelectedBienes([]);
+                    const resp = responsables?.find(r => r.id === parseInt(v));
+                    if (resp) {
+                      setEntregaNombre(resp.nombre);
+                      setEntregaCargo(resp.cargo || '');
+                    }
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Seleccione el responsable actual" /></SelectTrigger>
+                  <SelectContent>
+                    {responsables?.map(r => (
+                      <SelectItem key={r.id} value={r.id.toString()}>
+                        {r.nombre} - {r.cargo || 'Sin cargo'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+
+              {selectedEntregaResponsable && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-muted-foreground flex items-center">
+                      <Package className="w-4 h-4 mr-1.5" />
+                      Bienes a transferir ({selectedBienes.length} de {bienesEntrega.length})
+                    </label>
+                    <Button variant="ghost" size="sm" onClick={toggleAllBienes} className="text-xs h-7">
+                      {selectedBienes.length === bienesEntrega.length ? 'Limpiar' : 'Seleccionar todos'}
+                    </Button>
+                  </div>
+                  <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+                    {bienesEntrega.length === 0 ? (
+                      <div className="p-4 text-sm text-muted-foreground text-center">Este responsable no tiene bienes asignados</div>
+                    ) : (
+                      <div className="divide-y">
+                        {bienesEntrega.map(b => (
+                          <label
+                            key={b.id}
+                            className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 cursor-pointer text-sm"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedBienes.includes(b.id.toString())}
+                              onChange={() => toggleBien(b.id.toString())}
+                              className="rounded border-gray-300"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium">{b.nombre}</span>
+                              <span className="text-muted-foreground ml-2">({b.codigoInterno || b.numeroPatrimonial || 'S/N'})</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground shrink-0">{b.dependenciaNombre || '-'}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                 <div className="space-y-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -433,7 +468,7 @@ export default function Documentos() {
                           ...b,
                           fechaAlta: b.fechaAlta?.toString() || '',
                         }))}
-                        responsableAnterior={responsableAnterior}
+                        responsableAnterior={entregaNombre || null}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
                         entregaNombre={entregaNombre || '________________________________'}
@@ -457,7 +492,7 @@ export default function Documentos() {
                           ...b,
                           fechaAlta: b.fechaAlta?.toString() || '',
                         }))}
-                        responsableAnterior={responsableAnterior}
+                        responsableAnterior={entregaNombre || null}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
                         entregaNombre={entregaNombre || '________________________________'}
@@ -536,11 +571,13 @@ export default function Documentos() {
                   disabled={!selectedBien}
                   onClick={() => {
                     if (!bienSeleccionado) return;
+                    const respCargo = responsables?.find(r => r.id === bienSeleccionado.responsableId)?.cargo || null;
                     setPreviewDoc(
                       <ActaBajaPDF
                         bien={{
                           ...bienSeleccionado,
                           fechaAlta: bienSeleccionado.fechaAlta?.toString() || '',
+                          responsableCargo: respCargo,
                         }}
                         movimientos={movimientosBien}
                         institucion={institucion || 'Institución'}
@@ -563,6 +600,7 @@ export default function Documentos() {
                         bien={{
                           ...bienSeleccionado,
                           fechaAlta: bienSeleccionado.fechaAlta?.toString() || '',
+                          responsableCargo: responsables?.find(r => r.id === bienSeleccionado.responsableId)?.cargo || null,
                         }}
                         movimientos={movimientosBien}
                         institucion={institucion || 'Institución'}

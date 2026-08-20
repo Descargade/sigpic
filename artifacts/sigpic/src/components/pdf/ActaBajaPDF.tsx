@@ -16,6 +16,7 @@ interface BienData {
   categoriaNombre?: string | null;
   dependenciaNombre?: string | null;
   responsableNombre?: string | null;
+  responsableCargo?: string | null;
   origenBien?: string | null;
   observaciones?: string | null;
   fechaAlta: string;
@@ -136,7 +137,7 @@ export function ActaBajaPDF({
           <View style={docStyles.signatureBlock}>
             <View style={docStyles.signatureLineAbove} />
             <Text style={docStyles.signatureName}>{bien.responsableNombre || '________________________________'}</Text>
-            <Text style={docStyles.signatureRole}>{bien.dependenciaNombre || ''}</Text>
+            <Text style={docStyles.signatureRole}>{bien.responsableCargo || bien.dependenciaNombre || ''}</Text>
           </View>
           <View style={docStyles.signatureBlock}>
             <View style={docStyles.signatureLineAbove} />
