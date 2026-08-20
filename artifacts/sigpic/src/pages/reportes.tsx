@@ -143,7 +143,7 @@ export default function Reportes() {
     } finally {
       setDownloadingPDF(false);
     }
-  }, [filters, allBienes, dependencias, responsables, categorias, catalogos, institucion, unidad]);
+  }, [filters, allBienes, dependencias, responsables, categorias, estadosFisicos, estadosAdministrativos, origenes, institucion, unidad]);
 
   const clearFilters = () => {
     setFilters({
