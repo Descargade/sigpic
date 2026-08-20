@@ -128,12 +128,14 @@ export const docStyles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     justifyContent: 'center',
+    paddingLeft: 4,
   },
   tableCellLeft: {
     fontSize: 8,
     color: '#000',
     textAlign: 'left',
     justifyContent: 'center',
+    paddingLeft: 6,
   },
   tableCellLast: {
     fontSize: 8,
