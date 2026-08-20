@@ -79,29 +79,24 @@ export function ActaEntregaPDF({
         <Text style={docStyles.docSubtitle}>{parrafo}</Text>
 
         <View style={docStyles.table}>
-          <View style={{ position: 'relative' }}>
-            <View style={docStyles.tableHeader}>
-              <Text style={[docStyles.tableHeaderText, { width: 25 }]}>N°</Text>
-              <Text style={[docStyles.tableHeaderText, { width: 100 }]}>UBICACION</Text>
-              <Text style={[docStyles.tableHeaderText, { flex: 1 }]}>DESCRIPCION</Text>
-              <Text style={[docStyles.tableHeaderText, { width: 40 }]}>CANT</Text>
-            </View>
-            {bienes.map((b, idx) => (
-              <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                <Text style={[docStyles.tableCell, { width: 25 }]}>{idx + 1}</Text>
-                <Text style={[docStyles.tableCellLeft, { width: 100 }]}>
-                  {b.ubicacion || b.dependenciaNombre || '-'}
-                </Text>
-                <Text style={[docStyles.tableCellLeft, { flex: 1 }]}>
-                  {buildDescripcion(b)}
-                </Text>
-                <Text style={[docStyles.tableCellLast, { width: 40 }]}>1</Text>
-              </View>
-            ))}
-            <View style={{ position: 'absolute', left: 29, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
-            <View style={{ position: 'absolute', left: 129, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
-            <View style={{ position: 'absolute', left: 468, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
+          <View style={docStyles.tableHeader}>
+            <Text style={[docStyles.tableHeaderText, { width: 25 }]}>N°</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 100 }]}>UBICACION</Text>
+            <Text style={[docStyles.tableHeaderText, { flex: 1 }]}>DESCRIPCION</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 40 }]}>CANT</Text>
           </View>
+          {bienes.map((b, idx) => (
+            <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
+              <Text style={[docStyles.tableCell, { width: 25 }]}>{idx + 1}</Text>
+              <Text style={[docStyles.tableCellLeft, { width: 100 }]}>
+                {b.ubicacion || b.dependenciaNombre || '-'}
+              </Text>
+              <Text style={[docStyles.tableCellLeft, { flex: 1 }]}>
+                {buildDescripcion(b)}
+              </Text>
+              <Text style={[docStyles.tableCellLast, { width: 40 }]}>1</Text>
+            </View>
+          ))}
         </View>
 
         <View style={docStyles.signatureSectionDual}>
