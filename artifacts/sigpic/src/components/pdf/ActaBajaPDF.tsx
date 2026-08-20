@@ -128,6 +128,7 @@ export function ActaBajaPDF({
                 ))}
                 <View style={{ position: 'absolute', left: 74, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
                 <View style={{ position: 'absolute', left: 164, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
+                <View style={{ position: 'absolute', left: 428, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
               </View>
             </View>
           </>

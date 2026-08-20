@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import { pdf, PDFViewer } from '@react-pdf/renderer';
 import {
   useListDependencias,
   useListResponsables,
@@ -32,6 +32,16 @@ import { InventarioPDF } from '@/components/pdf/InventarioPDF';
 import { ActaResponsabilidadPDF } from '@/components/pdf/ActaResponsabilidadPDF';
 import { ActaEntregaPDF } from '@/components/pdf/ActaEntregaPDF';
 import { ActaBajaPDF } from '@/components/pdf/ActaBajaPDF';
+
+async function handleDownload(doc: React.ReactElement, filename: string) {
+  const blob = await pdf(doc).toBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 function useConfigValue(clave: string): string {
   const { data: config } = useListConfiguracion();
@@ -241,21 +251,21 @@ export default function Documentos() {
                   Vista Previa
                 </Button>
 
-                <PDFDownloadLink
-                  document={buildInventarioPDF({
-                    dependenciaId: selectedDependencia,
-                    responsableId: selectedResponsable,
-                    categoriaId: selectedCategoria,
-                  })}
-                  fileName={`SIGPIC_Inventario_${new Date().toISOString().slice(0, 10)}.pdf`}
-                >
-                  {({ loading }) => (
-                    <Button variant="outline" disabled={loading} className="gap-2">
-                      <Download className="w-4 h-4" />
-                      {loading ? 'Generando...' : 'Descargar PDF'}
-                    </Button>
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => handleDownload(
+                    buildInventarioPDF({
+                      dependenciaId: selectedDependencia,
+                      responsableId: selectedResponsable,
+                      categoriaId: selectedCategoria,
+                    }),
+                    `SIGPIC_Inventario_${new Date().toISOString().slice(0, 10)}.pdf`
                   )}
-                </PDFDownloadLink>
+                >
+                  <Download className="w-4 h-4" />
+                  Descargar PDF
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -325,8 +335,10 @@ export default function Documentos() {
                 </Button>
 
                 {responsableSeleccionado && (
-                  <PDFDownloadLink
-                    document={
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => handleDownload(
                       <ActaResponsabilidadPDF
                         responsable={{
                           nombre: responsableSeleccionado.nombre,
@@ -339,17 +351,13 @@ export default function Documentos() {
                           .map(b => ({ ...b, fechaAlta: b.fechaAlta?.toString() || '' }))}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
-                      />
-                    }
-                    fileName={`SIGPIC_ActaResponsabilidad_${responsableSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`}
-                  >
-                    {({ loading }) => (
-                      <Button variant="outline" disabled={loading} className="gap-2">
-                        <Download className="w-4 h-4" />
-                        {loading ? 'Generando...' : 'Descargar PDF'}
-                      </Button>
+                      />,
+                      `SIGPIC_ActaResponsabilidad_${responsableSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`
                     )}
-                  </PDFDownloadLink>
+                  >
+                    <Download className="w-4 h-4" />
+                    Descargar PDF
+                  </Button>
                 )}
               </div>
             </CardContent>
@@ -485,8 +493,10 @@ export default function Documentos() {
                 </Button>
 
                 {selectedBienes.length > 0 && (
-                  <PDFDownloadLink
-                    document={
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => handleDownload(
                       <ActaEntregaPDF
                         bienes={bienesSeleccionados.map(b => ({
                           ...b,
@@ -499,17 +509,13 @@ export default function Documentos() {
                         entregaCargo={entregaCargo || 'Cargo'}
                         recibeNombre={recibeNombre || '________________________________'}
                         recibeCargo={recibeCargo || 'Cargo'}
-                      />
-                    }
-                    fileName={`SIGPIC_ActaEntrega_${new Date().toISOString().slice(0, 10)}.pdf`}
-                  >
-                    {({ loading }) => (
-                      <Button variant="outline" disabled={loading} className="gap-2">
-                        <Download className="w-4 h-4" />
-                        {loading ? 'Generando...' : 'Descargar PDF'}
-                      </Button>
+                      />,
+                      `SIGPIC_ActaEntrega_${new Date().toISOString().slice(0, 10)}.pdf`
                     )}
-                  </PDFDownloadLink>
+                  >
+                    <Download className="w-4 h-4" />
+                    Descargar PDF
+                  </Button>
                 )}
               </div>
             </CardContent>
@@ -594,8 +600,10 @@ export default function Documentos() {
                 </Button>
 
                 {bienSeleccionado && (
-                  <PDFDownloadLink
-                    document={
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => handleDownload(
                       <ActaBajaPDF
                         bien={{
                           ...bienSeleccionado,
@@ -607,17 +615,13 @@ export default function Documentos() {
                         unidad={unidad || 'Unidad'}
                         firmanteNombre={bajaFirmanteNombre || '________________________________'}
                         firmanteCargo={bajaFirmanteCargo || 'Cargo'}
-                      />
-                    }
-                    fileName={`SIGPIC_ActaBaja_${bienSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`}
-                  >
-                    {({ loading }) => (
-                      <Button variant="outline" disabled={loading} className="gap-2">
-                        <Download className="w-4 h-4" />
-                        {loading ? 'Generando...' : 'Descargar PDF'}
-                      </Button>
+                      />,
+                      `SIGPIC_ActaBaja_${bienSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`
                     )}
-                  </PDFDownloadLink>
+                  >
+                    <Download className="w-4 h-4" />
+                    Descargar PDF
+                  </Button>
                 )}
               </div>
             </CardContent>

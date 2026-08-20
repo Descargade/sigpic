@@ -100,6 +100,7 @@ export function ActaEntregaPDF({
             ))}
             <View style={{ position: 'absolute', left: 29, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
             <View style={{ position: 'absolute', left: 129, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
+            <View style={{ position: 'absolute', left: 468, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
           </View>
         </View>
 
