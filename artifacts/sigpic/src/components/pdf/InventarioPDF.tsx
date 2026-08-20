@@ -98,7 +98,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
               </View>
             ) : (
               bienes.map((b, idx) => (
-                <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
+                <View key={b.id} style={[docStyles.tableRow, idx % 2 === 0 && docStyles.tableRowAlt, { breakInside: 'avoid' }]}>
                   <Text style={[docStyles.tableCell, { width: colWidths[0] }]}>{b.codigoInterno || '-'}</Text>
                   <Text style={[docStyles.tableCell, { width: colWidths[1] }]}>{b.numeroPatrimonial || '-'}</Text>
                   <Text style={[docStyles.tableCell, { width: colWidths[2] }]}>{b.numeroSerie || '-'}</Text>
