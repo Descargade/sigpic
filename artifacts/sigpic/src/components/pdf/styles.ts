@@ -94,14 +94,14 @@ export const docStyles = StyleSheet.create({
   /* ─── TABLE (FORMAL BORDERS + CENTERED) ──────────────────── */
   table: {
     marginTop: 10,
-    borderWidth: 1,
-    borderColor: '#000',
+    borderWidth: 0,
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#000',
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#000',
     paddingVertical: 6,
     paddingHorizontal: 4,
   },
@@ -129,8 +129,6 @@ export const docStyles = StyleSheet.create({
     textAlign: 'center',
     justifyContent: 'center',
     paddingLeft: 4,
-    borderRightWidth: 1,
-    borderRightColor: '#000',
   },
   tableCellLeft: {
     fontSize: 8,
@@ -138,8 +136,6 @@ export const docStyles = StyleSheet.create({
     textAlign: 'left',
     justifyContent: 'center',
     paddingLeft: 6,
-    borderRightWidth: 1,
-    borderRightColor: '#000',
   },
   tableCellLast: {
     fontSize: 8,
