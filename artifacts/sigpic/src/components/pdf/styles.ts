@@ -197,7 +197,7 @@ export const docStyles = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Times-Bold',
     color: '#000',
-    marginTop: 25,
+    marginTop: 5,
     marginBottom: 3,
     textTransform: 'uppercase',
   },

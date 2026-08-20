@@ -135,15 +135,13 @@ export function ActaBajaPDF({
         <View style={docStyles.signatureSectionDual}>
           <View style={docStyles.signatureBlock}>
             <View style={docStyles.signatureLineAbove} />
-            <Text style={docStyles.signatureLabel}>ENTREGUÉ CONFORME</Text>
-            <Text style={docStyles.signatureName}>{firmante}</Text>
-            <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
+            <Text style={docStyles.signatureName}>{bien.responsableNombre || '________________________________'}</Text>
+            <Text style={docStyles.signatureRole}>{bien.dependenciaNombre || ''}</Text>
           </View>
           <View style={docStyles.signatureBlock}>
             <View style={docStyles.signatureLineAbove} />
-            <Text style={docStyles.signatureLabel}>RECIBÍ CONFORME</Text>
-            <Text style={docStyles.signatureName}>{bien.responsableNombre || '________________________________'}</Text>
-            <Text style={docStyles.signatureRole}>{bien.dependenciaNombre || ''}</Text>
+            <Text style={docStyles.signatureName}>{firmante}</Text>
+            <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
           </View>
         </View>
 

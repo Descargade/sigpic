@@ -102,19 +102,10 @@ export function ActaResponsabilidadPDF({
           )}
         </View>
 
-        <View style={docStyles.signatureSectionDual}>
-          <View style={docStyles.signatureBlock}>
-            <View style={docStyles.signatureLineAbove} />
-            <Text style={docStyles.signatureLabel}>ENTREGUÉ CONFORME</Text>
-            <Text style={docStyles.signatureName}>{firmante}</Text>
-            <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
-          </View>
-          <View style={docStyles.signatureBlock}>
-            <View style={docStyles.signatureLineAbove} />
-            <Text style={docStyles.signatureLabel}>RECIBÍ CONFORME</Text>
-            <Text style={docStyles.signatureName}>{responsable.nombre}</Text>
-            <Text style={docStyles.signatureRole}>{responsable.cargo || responsable.dependenciaNombre || ''}</Text>
-          </View>
+        <View style={docStyles.signatureSection}>
+          <View style={docStyles.signatureLineAbove} />
+          <Text style={[docStyles.signatureName, { marginTop: 5 }]}>{responsable.nombre}</Text>
+          <Text style={docStyles.signatureRole}>{responsable.cargo || responsable.dependenciaNombre || ''}</Text>
         </View>
 
         <View style={docStyles.footer}>
