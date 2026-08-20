@@ -33,16 +33,6 @@ import { ActaResponsabilidadPDF } from '@/components/pdf/ActaResponsabilidadPDF'
 import { ActaEntregaPDF } from '@/components/pdf/ActaEntregaPDF';
 import { ActaBajaPDF } from '@/components/pdf/ActaBajaPDF';
 
-async function handleDownload(doc: React.ReactElement, filename: string) {
-  const blob = await pdf(doc).toBlob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 function useConfigValue(clave: string): string {
   const { data: config } = useListConfiguracion();
   return config?.find(c => c.clave === clave)?.valor || '';
@@ -152,6 +142,27 @@ export default function Documentos() {
     );
   }, [bienesFiltrados, dependencias, responsables, categorias, institucion, unidad]);
 
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  const handleDownload = useCallback(async (doc: React.ReactElement, filename: string) => {
+    setDownloading(filename);
+    try {
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Error generating PDF:', e);
+    } finally {
+      setDownloading(null);
+    }
+  }, []);
+
   return (
     <div className="p-8 space-y-6 animate-in fade-in duration-500 max-w-6xl mx-auto">
       <div>
@@ -253,7 +264,7 @@ export default function Documentos() {
 
                 <Button
                   variant="outline"
-                  className="gap-2"
+                  disabled={downloading === `SIGPIC_Inventario_${new Date().toISOString().slice(0, 10)}.pdf`}
                   onClick={() => handleDownload(
                     buildInventarioPDF({
                       dependenciaId: selectedDependencia,
@@ -262,9 +273,10 @@ export default function Documentos() {
                     }),
                     `SIGPIC_Inventario_${new Date().toISOString().slice(0, 10)}.pdf`
                   )}
+                  className="gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Descargar PDF
+                  {downloading === `SIGPIC_Inventario_${new Date().toISOString().slice(0, 10)}.pdf` ? 'Generando...' : 'Descargar PDF'}
                 </Button>
               </div>
             </CardContent>
@@ -337,23 +349,27 @@ export default function Documentos() {
                 {responsableSeleccionado && (
                   <Button
                     variant="outline"
+                    disabled={downloading !== null}
+                    onClick={() => {
+                      if (!responsableSeleccionado) return;
+                      handleDownload(
+                        <ActaResponsabilidadPDF
+                          responsable={{
+                            nombre: responsableSeleccionado.nombre,
+                            cargo: responsableSeleccionado.cargo,
+                            jerarquia: responsableSeleccionado.jerarquia,
+                            dependenciaNombre: dependencias?.find(d => d.id === responsableSeleccionado.dependenciaId)?.nombre,
+                          }}
+                          bienes={bienesFiltrados
+                            .filter(b => b.responsableId === responsableSeleccionado.id && b.activo)
+                            .map(b => ({ ...b, fechaAlta: b.fechaAlta?.toString() || '' }))}
+                          institucion={institucion || 'Institución'}
+                          unidad={unidad || 'Unidad'}
+                        />,
+                        `SIGPIC_ActaResponsabilidad_${responsableSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`
+                      );
+                    }}
                     className="gap-2"
-                    onClick={() => handleDownload(
-                      <ActaResponsabilidadPDF
-                        responsable={{
-                          nombre: responsableSeleccionado.nombre,
-                          cargo: responsableSeleccionado.cargo,
-                          jerarquia: responsableSeleccionado.jerarquia,
-                          dependenciaNombre: dependencias?.find(d => d.id === responsableSeleccionado.dependenciaId)?.nombre,
-                        }}
-                        bienes={bienesFiltrados
-                          .filter(b => b.responsableId === responsableSeleccionado.id && b.activo)
-                          .map(b => ({ ...b, fechaAlta: b.fechaAlta?.toString() || '' }))}
-                        institucion={institucion || 'Institución'}
-                        unidad={unidad || 'Unidad'}
-                      />,
-                      `SIGPIC_ActaResponsabilidad_${responsableSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`
-                    )}
                   >
                     <Download className="w-4 h-4" />
                     Descargar PDF
@@ -495,23 +511,27 @@ export default function Documentos() {
                 {selectedBienes.length > 0 && (
                   <Button
                     variant="outline"
+                    disabled={downloading !== null}
+                    onClick={() => {
+                      if (bienesSeleccionados.length === 0) return;
+                      handleDownload(
+                        <ActaEntregaPDF
+                          bienes={bienesSeleccionados.map(b => ({
+                            ...b,
+                            fechaAlta: b.fechaAlta?.toString() || '',
+                          }))}
+                          responsableAnterior={entregaNombre || null}
+                          institucion={institucion || 'Institución'}
+                          unidad={unidad || 'Unidad'}
+                          entregaNombre={entregaNombre || '________________________________'}
+                          entregaCargo={entregaCargo || 'Cargo'}
+                          recibeNombre={recibeNombre || '________________________________'}
+                          recibeCargo={recibeCargo || 'Cargo'}
+                        />,
+                        `SIGPIC_ActaEntrega_${new Date().toISOString().slice(0, 10)}.pdf`
+                      );
+                    }}
                     className="gap-2"
-                    onClick={() => handleDownload(
-                      <ActaEntregaPDF
-                        bienes={bienesSeleccionados.map(b => ({
-                          ...b,
-                          fechaAlta: b.fechaAlta?.toString() || '',
-                        }))}
-                        responsableAnterior={entregaNombre || null}
-                        institucion={institucion || 'Institución'}
-                        unidad={unidad || 'Unidad'}
-                        entregaNombre={entregaNombre || '________________________________'}
-                        entregaCargo={entregaCargo || 'Cargo'}
-                        recibeNombre={recibeNombre || '________________________________'}
-                        recibeCargo={recibeCargo || 'Cargo'}
-                      />,
-                      `SIGPIC_ActaEntrega_${new Date().toISOString().slice(0, 10)}.pdf`
-                    )}
                   >
                     <Download className="w-4 h-4" />
                     Descargar PDF
@@ -602,22 +622,26 @@ export default function Documentos() {
                 {bienSeleccionado && (
                   <Button
                     variant="outline"
+                    disabled={downloading !== null}
+                    onClick={() => {
+                      if (!bienSeleccionado) return;
+                      handleDownload(
+                        <ActaBajaPDF
+                          bien={{
+                            ...bienSeleccionado,
+                            fechaAlta: bienSeleccionado.fechaAlta?.toString() || '',
+                            responsableCargo: responsables?.find(r => r.id === bienSeleccionado.responsableId)?.cargo || null,
+                          }}
+                          movimientos={movimientosBien}
+                          institucion={institucion || 'Institución'}
+                          unidad={unidad || 'Unidad'}
+                          firmanteNombre={bajaFirmanteNombre || '________________________________'}
+                          firmanteCargo={bajaFirmanteCargo || 'Cargo'}
+                        />,
+                        `SIGPIC_ActaBaja_${bienSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`
+                      );
+                    }}
                     className="gap-2"
-                    onClick={() => handleDownload(
-                      <ActaBajaPDF
-                        bien={{
-                          ...bienSeleccionado,
-                          fechaAlta: bienSeleccionado.fechaAlta?.toString() || '',
-                          responsableCargo: responsables?.find(r => r.id === bienSeleccionado.responsableId)?.cargo || null,
-                        }}
-                        movimientos={movimientosBien}
-                        institucion={institucion || 'Institución'}
-                        unidad={unidad || 'Unidad'}
-                        firmanteNombre={bajaFirmanteNombre || '________________________________'}
-                        firmanteCargo={bajaFirmanteCargo || 'Cargo'}
-                      />,
-                      `SIGPIC_ActaBaja_${bienSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`
-                    )}
                   >
                     <Download className="w-4 h-4" />
                     Descargar PDF
