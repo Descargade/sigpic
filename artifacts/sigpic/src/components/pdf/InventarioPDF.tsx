@@ -34,8 +34,19 @@ interface InventarioPDFProps {
 const colWidths = [50, 50, 45, 95, 60, 50, 50, 35, 60, 60, 65];
 const colHeaders = ['Código', 'Nº Patrim.', 'Nº Serie', 'Nombre', 'Categoría', 'Marca', 'Modelo', 'Cant.', 'Estado Fís.', 'Estado Admin.', 'Dependencia'];
 
+function colPositions(): number[] {
+  const positions: number[] = [];
+  let acc = 4;
+  for (let i = 0; i < colWidths.length - 1; i++) {
+    acc += colWidths[i];
+    positions.push(acc);
+  }
+  return positions;
+}
+
 export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion = 'Institución', unidad = 'Unidad' }: InventarioPDFProps) {
   const ahora = new Date();
+  const lines = colPositions();
 
   return (
     <Document>
@@ -75,10 +86,10 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
         </View>
 
         <View style={docStyles.table}>
-          <View>
+          <View style={{ position: 'relative' }}>
             <View style={docStyles.tableHeader}>
               {colHeaders.map((h, i) => (
-                <Text key={i} style={[docStyles.tableHeaderText, { width: colWidths[i], borderRightWidth: i < colHeaders.length - 1 ? 1 : 0, borderRightColor: '#000' }]}>{h}</Text>
+                <Text key={i} style={[docStyles.tableHeaderText, { width: colWidths[i] }]}>{h}</Text>
               ))}
             </View>
             {bienes.length === 0 ? (
@@ -102,6 +113,9 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
                 </View>
               ))
             )}
+            {lines.map((x, i) => (
+              <View key={i} style={{ position: 'absolute', left: x, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
+            ))}
           </View>
         </View>
 
