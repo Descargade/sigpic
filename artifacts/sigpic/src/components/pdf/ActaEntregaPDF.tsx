@@ -15,10 +15,11 @@ interface BienData {
   categoriaNombre?: string | null;
   dependenciaNombre?: string | null;
   responsableNombre?: string | null;
+  ubicacion?: string | null;
 }
 
 interface ActaEntregaPDFProps {
-  bien: BienData;
+  bienes: BienData[];
   responsableAnterior?: string | null;
   institucion?: string;
   unidad?: string;
@@ -42,7 +43,7 @@ function buildDescripcion(b: BienData): string {
 }
 
 export function ActaEntregaPDF({
-  bien, responsableAnterior,
+  bienes, responsableAnterior,
   institucion = 'Institución', unidad = 'Unidad',
   entregaNombre = '________________________________', entregaCargo = 'Cargo',
   recibeNombre = '________________________________', recibeCargo = 'Cargo',
@@ -50,7 +51,9 @@ export function ActaEntregaPDF({
   const ahora = new Date();
   const fecha = fechaEnLetras(ahora);
 
-  const parrafo = `En la Ciudad Autónoma de Buenos Aires, asiento del ${institucion.toUpperCase()}, a los ${fecha.completa}, se labra la presente Acta a fin de dejar constancia de la entrega del siguiente bien patrimonial${responsableAnterior ? ` por parte de ${responsableAnterior}` : ''}, conforme al siguiente detalle:`;
+  const parrafo = bienes.length === 1
+    ? `En la Ciudad Autónoma de Buenos Aires, asiento del ${institucion.toUpperCase()}, a los ${fecha.completa}, se labra la presente Acta a fin de dejar constancia de la entrega del siguiente bien patrimonial${responsableAnterior ? ` por parte de ${responsableAnterior}` : ''}, conforme al siguiente detalle:`
+    : `En la Ciudad Autónoma de Buenos Aires, asiento del ${institucion.toUpperCase()}, a los ${fecha.completa}, se labra la presente Acta a fin de dejar constancia de la entrega de los siguientes ${bienes.length} bienes patrimoniales${responsableAnterior ? ` por parte de ${responsableAnterior}` : ''}, conforme al siguiente detalle:`;
 
   return (
     <Document>
@@ -77,17 +80,23 @@ export function ActaEntregaPDF({
 
         <View style={docStyles.table}>
           <View style={docStyles.tableHeader}>
-            <Text style={[docStyles.tableHeaderText, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>#</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 25, borderRightWidth: 1, borderRightColor: '#000' }]}>N°</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 100, borderRightWidth: 1, borderRightColor: '#000' }]}>UBICACION</Text>
             <Text style={[docStyles.tableHeaderText, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>DESCRIPCION</Text>
-            <Text style={[docStyles.tableHeaderText, { width: 50 }]}>CANT.</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 40 }]}>CANT</Text>
           </View>
-          <View style={[docStyles.tableRow, docStyles.tableRowAlt]}>
-            <Text style={[docStyles.tableCell, { width: 30, borderRightWidth: 1, borderRightColor: '#000' }]}>1</Text>
-            <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
-              {buildDescripcion(bien)}
-            </Text>
-            <Text style={[docStyles.tableCellLast, { width: 50 }]}>1</Text>
-          </View>
+          {bienes.map((b, idx) => (
+            <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
+              <Text style={[docStyles.tableCell, { width: 25, borderRightWidth: 1, borderRightColor: '#000' }]}>{idx + 1}</Text>
+              <Text style={[docStyles.tableCell, { width: 100, borderRightWidth: 1, borderRightColor: '#000' }]}>
+                {b.ubicacion || b.dependenciaNombre || '-'}
+              </Text>
+              <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+                {buildDescripcion(b)}
+              </Text>
+              <Text style={[docStyles.tableCellLast, { width: 40 }]}>1</Text>
+            </View>
+          ))}
         </View>
 
         <View style={docStyles.signatureSectionDual}>

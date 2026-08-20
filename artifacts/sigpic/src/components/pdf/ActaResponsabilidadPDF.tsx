@@ -27,8 +27,6 @@ interface ActaResponsabilidadPDFProps {
   bienes: BienData[];
   institucion?: string;
   unidad?: string;
-  firmante?: string;
-  cargoFirmante?: string;
 }
 
 function buildDescripcion(b: BienData): string {
@@ -47,7 +45,6 @@ function buildDescripcion(b: BienData): string {
 export function ActaResponsabilidadPDF({
   responsable, bienes,
   institucion = 'Institución', unidad = 'Unidad',
-  firmante = '________________________________', cargoFirmante = 'Cargo',
 }: ActaResponsabilidadPDFProps) {
   const ahora = new Date();
   const fecha = fechaEnLetras(ahora);

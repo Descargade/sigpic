@@ -33,8 +33,8 @@ interface ActaBajaPDFProps {
   movimientos: MovimientoData[];
   institucion?: string;
   unidad?: string;
-  firmante?: string;
-  cargoFirmante?: string;
+  firmanteNombre?: string;
+  firmanteCargo?: string;
 }
 
 function buildDescripcion(b: BienData): string {
@@ -55,7 +55,7 @@ function buildDescripcion(b: BienData): string {
 export function ActaBajaPDF({
   bien, movimientos,
   institucion = 'Institución', unidad = 'Unidad',
-  firmante = '________________________________', cargoFirmante = 'Cargo',
+  firmanteNombre = '________________________________', firmanteCargo = 'Cargo',
 }: ActaBajaPDFProps) {
   const ahora = new Date();
   const fecha = fechaEnLetras(ahora);
@@ -140,8 +140,8 @@ export function ActaBajaPDF({
           </View>
           <View style={docStyles.signatureBlock}>
             <View style={docStyles.signatureLineAbove} />
-            <Text style={docStyles.signatureName}>{firmante}</Text>
-            <Text style={docStyles.signatureRole}>{cargoFirmante}</Text>
+            <Text style={docStyles.signatureName}>{firmanteNombre}</Text>
+            <Text style={docStyles.signatureRole}>{firmanteCargo}</Text>
           </View>
         </View>
 

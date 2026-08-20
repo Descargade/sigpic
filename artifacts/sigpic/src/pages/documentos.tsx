@@ -43,12 +43,13 @@ export default function Documentos() {
   const [selectedResponsable, setSelectedResponsable] = useState<string>('');
   const [selectedCategoria, setSelectedCategoria] = useState<string>('');
   const [selectedBien, setSelectedBien] = useState<string>('');
-  const [firmante, setFirmante] = useState<string>('');
-  const [cargoFirmante, setCargoFirmante] = useState<string>('');
+  const [selectedBienes, setSelectedBienes] = useState<string[]>([]);
   const [entregaNombre, setEntregaNombre] = useState<string>('');
   const [entregaCargo, setEntregaCargo] = useState<string>('');
   const [recibeNombre, setRecibeNombre] = useState<string>('');
   const [recibeCargo, setRecibeCargo] = useState<string>('');
+  const [bajaFirmanteNombre, setBajaFirmanteNombre] = useState<string>('');
+  const [bajaFirmanteCargo, setBajaFirmanteCargo] = useState<string>('');
   const [previewDoc, setPreviewDoc] = useState<any>(null);
   const [movimientosBien, setMovimientosBien] = useState<any[]>([]);
   const [responsableAnterior, setResponsableAnterior] = useState<string | null>(null);
@@ -63,7 +64,22 @@ export default function Documentos() {
 
   const bienesFiltrados = allBienes?.filter(b => !b.parentId) || [];
   const bienSeleccionado = allBienes?.find(b => b.id === parseInt(selectedBien || '0'));
+  const bienesSeleccionados = bienesFiltrados.filter(b => selectedBienes.includes(b.id.toString()));
   const responsableSeleccionado = responsables?.find(r => r.id === parseInt(selectedResponsable || '0'));
+
+  const toggleBien = (id: string) => {
+    setSelectedBienes(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleAllBienes = () => {
+    if (selectedBienes.length === bienesFiltrados.length) {
+      setSelectedBienes([]);
+    } else {
+      setSelectedBienes(bienesFiltrados.map(b => b.id.toString()));
+    }
+  };
 
   useEffect(() => {
     if (!selectedBien) {
@@ -127,33 +143,6 @@ export default function Documentos() {
         <h1 className="text-3xl font-bold tracking-tight">Documentos Institucionales</h1>
         <p className="text-muted-foreground mt-1">Genere documentos patrimoniales con formato profesional para impresión y firma.</p>
       </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Datos del Firmante</CardTitle>
-          <CardDescription>Información de quien firma el documento institucional.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Nombre completo</label>
-              <Input
-                placeholder="Ej: Ariel Manuel GONZALEZ"
-                value={firmante}
-                onChange={(e) => setFirmante(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Cargo</label>
-              <Input
-                placeholder="Ej: Jefe de Informática"
-                value={cargoFirmante}
-                onChange={(e) => setCargoFirmante(e.target.value)}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       <Tabs defaultValue="inventario" className="w-full">
         <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent mb-6">
@@ -321,8 +310,6 @@ export default function Documentos() {
                         bienes={bienesDelResponsable}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
-                        firmante={firmante || '________________________________'}
-                        cargoFirmante={cargoFirmante || 'Cargo'}
                       />
                     );
                   }}
@@ -347,8 +334,6 @@ export default function Documentos() {
                           .map(b => ({ ...b, fechaAlta: b.fechaAlta?.toString() || '' }))}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
-                        firmante={firmante || '________________________________'}
-                        cargoFirmante={cargoFirmante || 'Cargo'}
                       />
                     }
                     fileName={`SIGPIC_ActaResponsabilidad_${responsableSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`}
@@ -371,35 +356,46 @@ export default function Documentos() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Acta de Entrega / Recepción</CardTitle>
-              <CardDescription>Documento para transferir la responsabilidad de un bien entre funcionarios.</CardDescription>
+              <CardDescription>Documento para transferir la responsabilidad de bienes entre funcionarios.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground flex items-center">
-                  <Package className="w-4 h-4 mr-1.5" />
-                  Bien a transferir
-                </label>
-                <Select value={selectedBien} onValueChange={setSelectedBien}>
-                  <SelectTrigger><SelectValue placeholder="Seleccione un bien" /></SelectTrigger>
-                  <SelectContent>
-                    {bienesFiltrados.map(b => (
-                      <SelectItem key={b.id} value={b.id.toString()}>
-                        {b.nombre} ({b.codigoInterno || b.numeroPatrimonial || 'S/N'})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {bienSeleccionado && (
-                <div className="p-3 bg-muted/50 rounded-lg text-sm space-y-1">
-                  <p><strong>Nombre:</strong> {bienSeleccionado.nombre}</p>
-                  <p><strong>Código:</strong> {bienSeleccionado.codigoInterno || '-'}</p>
-                  <p><strong>Marca/Modelo:</strong> {bienSeleccionado.marca || '-'} {bienSeleccionado.modelo || ''}</p>
-                  <p><strong>Responsable actual:</strong> {bienSeleccionado.responsableNombre || 'Sin asignar'}</p>
-                  <p><strong>Dependencia:</strong> {bienSeleccionado.dependenciaNombre || '-'}</p>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-muted-foreground flex items-center">
+                    <Package className="w-4 h-4 mr-1.5" />
+                    Bienes a transferir ({selectedBienes.length} seleccionados)
+                  </label>
+                  <Button variant="ghost" size="sm" onClick={toggleAllBienes} className="text-xs h-7">
+                    {selectedBienes.length === bienesFiltrados.length ? 'Limpiar' : 'Seleccionar todos'}
+                  </Button>
                 </div>
-              )}
+                <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+                  {bienesFiltrados.length === 0 ? (
+                    <div className="p-4 text-sm text-muted-foreground text-center">No hay bienes disponibles</div>
+                  ) : (
+                    <div className="divide-y">
+                      {bienesFiltrados.map(b => (
+                        <label
+                          key={b.id}
+                          className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 cursor-pointer text-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedBienes.includes(b.id.toString())}
+                            onChange={() => toggleBien(b.id.toString())}
+                            className="rounded border-gray-300"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <span className="font-medium">{b.nombre}</span>
+                            <span className="text-muted-foreground ml-2">({b.codigoInterno || b.numeroPatrimonial || 'S/N'})</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground shrink-0">{b.dependenciaNombre || '-'}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                 <div className="space-y-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -428,12 +424,15 @@ export default function Documentos() {
 
               <div className="flex gap-3 pt-4 border-t">
                 <Button
-                  disabled={!selectedBien}
+                  disabled={selectedBienes.length === 0}
                   onClick={() => {
-                    if (!bienSeleccionado) return;
+                    if (bienesSeleccionados.length === 0) return;
                     setPreviewDoc(
                       <ActaEntregaPDF
-                        bien={bienSeleccionado}
+                        bienes={bienesSeleccionados.map(b => ({
+                          ...b,
+                          fechaAlta: b.fechaAlta?.toString() || '',
+                        }))}
                         responsableAnterior={responsableAnterior}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
@@ -450,11 +449,14 @@ export default function Documentos() {
                   Vista Previa
                 </Button>
 
-                {bienSeleccionado && (
+                {selectedBienes.length > 0 && (
                   <PDFDownloadLink
                     document={
                       <ActaEntregaPDF
-                        bien={bienSeleccionado}
+                        bienes={bienesSeleccionados.map(b => ({
+                          ...b,
+                          fechaAlta: b.fechaAlta?.toString() || '',
+                        }))}
                         responsableAnterior={responsableAnterior}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
@@ -464,7 +466,7 @@ export default function Documentos() {
                         recibeCargo={recibeCargo || 'Cargo'}
                       />
                     }
-                    fileName={`SIGPIC_ActaEntrega_${bienSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`}
+                    fileName={`SIGPIC_ActaEntrega_${new Date().toISOString().slice(0, 10)}.pdf`}
                   >
                     {({ loading }) => (
                       <Button variant="outline" disabled={loading} className="gap-2">
@@ -513,6 +515,22 @@ export default function Documentos() {
                 </div>
               )}
 
+              {bienSeleccionado && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                  <div className="space-y-3 p-3 bg-muted/50 rounded-lg border">
+                    <p className="text-sm font-semibold">FIRMANTE (Director)</p>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground">Nombre completo</label>
+                      <Input placeholder="Nombre del director" value={bajaFirmanteNombre} onChange={(e) => setBajaFirmanteNombre(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground">Cargo</label>
+                      <Input placeholder="Cargo del director" value={bajaFirmanteCargo} onChange={(e) => setBajaFirmanteCargo(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3 pt-4 border-t">
                 <Button
                   disabled={!selectedBien}
@@ -527,8 +545,8 @@ export default function Documentos() {
                         movimientos={movimientosBien}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
-                        firmante={firmante || '________________________________'}
-                        cargoFirmante={cargoFirmante || 'Cargo'}
+                        firmanteNombre={bajaFirmanteNombre || '________________________________'}
+                        firmanteCargo={bajaFirmanteCargo || 'Cargo'}
                       />
                     );
                   }}
@@ -549,8 +567,8 @@ export default function Documentos() {
                         movimientos={movimientosBien}
                         institucion={institucion || 'Institución'}
                         unidad={unidad || 'Unidad'}
-                        firmante={firmante || '________________________________'}
-                        cargoFirmante={cargoFirmante || 'Cargo'}
+                        firmanteNombre={bajaFirmanteNombre || '________________________________'}
+                        firmanteCargo={bajaFirmanteCargo || 'Cargo'}
                       />
                     }
                     fileName={`SIGPIC_ActaBaja_${bienSeleccionado.nombre.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`}
