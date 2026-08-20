@@ -132,6 +132,8 @@ export const docStyles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
     justifyContent: 'center',
+    borderRightWidth: 1,
+    borderRightColor: '#000',
   },
   tableCellLeft: {
     fontSize: 8,
