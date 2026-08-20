@@ -34,8 +34,19 @@ interface InventarioPDFProps {
 const colWidths = [50, 50, 45, 95, 60, 50, 50, 35, 60, 60, 65];
 const colHeaders = ['Código', 'Nº Patrim.', 'Nº Serie', 'Nombre', 'Categoría', 'Marca', 'Modelo', 'Cant.', 'Estado Fís.', 'Estado Admin.', 'Dependencia'];
 
+function colPositions(): number[] {
+  const positions: number[] = [];
+  let acc = 4;
+  for (let i = 0; i < colWidths.length - 1; i++) {
+    acc += colWidths[i];
+    positions.push(acc);
+  }
+  return positions;
+}
+
 export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion = 'Institución', unidad = 'Unidad' }: InventarioPDFProps) {
   const ahora = new Date();
+  const lines = colPositions();
 
   return (
     <Document>
@@ -75,32 +86,37 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
         </View>
 
         <View style={docStyles.table}>
-          <View style={docStyles.tableHeader}>
-            {colHeaders.map((h, i) => (
-              <Text key={i} style={[docStyles.tableHeaderText, { width: colWidths[i] }]}>{h}</Text>
+          <View style={{ position: 'relative' }}>
+            <View style={docStyles.tableHeader}>
+              {colHeaders.map((h, i) => (
+                <Text key={i} style={[docStyles.tableHeaderText, { width: colWidths[i] }]}>{h}</Text>
+              ))}
+            </View>
+            {bienes.length === 0 ? (
+              <View style={docStyles.tableRow}>
+                <Text style={docStyles.noData}>No hay bienes para mostrar</Text>
+              </View>
+            ) : (
+              bienes.map((b, idx) => (
+                <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
+                  <Text style={[docStyles.tableCell, { width: colWidths[0] }]}>{b.codigoInterno || '-'}</Text>
+                  <Text style={[docStyles.tableCell, { width: colWidths[1] }]}>{b.numeroPatrimonial || '-'}</Text>
+                  <Text style={[docStyles.tableCell, { width: colWidths[2] }]}>{b.numeroSerie || '-'}</Text>
+                  <Text style={[docStyles.tableCellLeft, { width: colWidths[3], fontFamily: 'Times-Bold' }]}>{b.nombre}</Text>
+                  <Text style={[docStyles.tableCell, { width: colWidths[4] }]}>{b.categoriaNombre || '-'}</Text>
+                  <Text style={[docStyles.tableCell, { width: colWidths[5] }]}>{b.marca || '-'}</Text>
+                  <Text style={[docStyles.tableCell, { width: colWidths[6] }]}>{b.modelo || '-'}</Text>
+                  <Text style={[docStyles.tableCell, { width: colWidths[7] }]}>{b.cantidad || 1}</Text>
+                  <Text style={[docStyles.tableCell, { width: colWidths[8] }]}>{b.estadoFisico}</Text>
+                  <Text style={[docStyles.tableCell, { width: colWidths[9] }]}>{b.estadoAdministrativo}</Text>
+                  <Text style={[docStyles.tableCellLast, { width: colWidths[10] }]}>{b.dependenciaNombre || '-'}</Text>
+                </View>
+              ))
+            )}
+            {lines.map((x, i) => (
+              <View key={i} style={{ position: 'absolute', left: x, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
             ))}
           </View>
-          {bienes.length === 0 ? (
-            <View style={docStyles.tableRow}>
-              <Text style={docStyles.noData}>No hay bienes para mostrar</Text>
-            </View>
-          ) : (
-            bienes.map((b, idx) => (
-              <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                <Text style={[docStyles.tableCell, { width: colWidths[0] }]}>{b.codigoInterno || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[1] }]}>{b.numeroPatrimonial || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[2] }]}>{b.numeroSerie || '-'}</Text>
-                <Text style={[docStyles.tableCellLeft, { width: colWidths[3], fontFamily: 'Times-Bold' }]}>{b.nombre}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[4] }]}>{b.categoriaNombre || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[5] }]}>{b.marca || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[6] }]}>{b.modelo || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[7] }]}>{b.cantidad || 1}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[8] }]}>{b.estadoFisico}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[9] }]}>{b.estadoAdministrativo}</Text>
-                <Text style={[docStyles.tableCellLast, { width: colWidths[10] }]}>{b.dependenciaNombre || '-'}</Text>
-              </View>
-            ))
-          )}
         </View>
 
         <View style={docStyles.footer}>

@@ -94,7 +94,8 @@ export const docStyles = StyleSheet.create({
   /* ─── TABLE (FORMAL BORDERS + CENTERED) ──────────────────── */
   table: {
     marginTop: 10,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: '#000',
   },
   tableHeader: {
     flexDirection: 'row',

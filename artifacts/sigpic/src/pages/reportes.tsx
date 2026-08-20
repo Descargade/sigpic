@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import React, { useState, useCallback } from 'react';
+import { pdf } from '@react-pdf/renderer';
 import { 
   useListDependencias, 
   useListResponsables, 
@@ -122,6 +122,28 @@ export default function Reportes() {
       window.open(fullUrl, '_blank');
     }
   };
+
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
+
+  const handleDownloadPDF = useCallback(async () => {
+    setDownloadingPDF(true);
+    try {
+      const doc = buildPDF();
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `SIGPIC_Reporte_${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Error generating PDF:', e);
+    } finally {
+      setDownloadingPDF(false);
+    }
+  }, [filters, allBienes, dependencias, responsables, categorias, catalogos, institucion, unidad]);
 
   const clearFilters = () => {
     setFilters({
@@ -486,18 +508,10 @@ export default function Reportes() {
                 Formato profesional para impresión
               </li>
             </ul>
-            <PDFDownloadLink
-              document={buildPDF()}
-              fileName={`SIGPIC_Reporte_${new Date().toISOString().slice(0, 10)}.pdf`}
-              className="w-full"
-            >
-              {({ loading }) => (
-                <Button variant="outline" className="w-full border-blue-200 hover:bg-blue-50" disabled={loading}>
-                  <Download className="w-4 h-4 mr-2" />
-                  {loading ? 'Generando...' : 'Descargar PDF'}
-                </Button>
-              )}
-            </PDFDownloadLink>
+            <Button variant="outline" className="w-full border-blue-200 hover:bg-blue-50" onClick={handleDownloadPDF} disabled={downloadingPDF}>
+              <Download className="w-4 h-4 mr-2" />
+              {downloadingPDF ? 'Generando...' : 'Descargar PDF'}
+            </Button>
           </CardContent>
         </Card>
       </div>
