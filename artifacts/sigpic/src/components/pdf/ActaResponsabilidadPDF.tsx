@@ -79,9 +79,9 @@ export function ActaResponsabilidadPDF({
 
         <View style={docStyles.table}>
           <View style={docStyles.tableHeader}>
-            <Text style={[docStyles.tableHeaderText, { width: 25, borderRightWidth: 1, borderRightColor: '#000' }]}>N°</Text>
-            <Text style={[docStyles.tableHeaderText, { width: 100, borderRightWidth: 1, borderRightColor: '#000' }]}>UBICACION</Text>
-            <Text style={[docStyles.tableHeaderText, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>DESCRIPCION</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 25 }]}>N°</Text>
+            <Text style={[docStyles.tableHeaderText, { width: 100 }]}>UBICACION</Text>
+            <Text style={[docStyles.tableHeaderText, { flex: 1 }]}>DESCRIPCION</Text>
             <Text style={[docStyles.tableHeaderText, { width: 40 }]}>CANT</Text>
           </View>
           {bienes.length === 0 ? (
@@ -91,11 +91,11 @@ export function ActaResponsabilidadPDF({
           ) : (
             bienes.map((b, idx) => (
               <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                <Text style={[docStyles.tableCell, { width: 25, borderRightWidth: 1, borderRightColor: '#000' }]}>{idx + 1}</Text>
-                <Text style={[docStyles.tableCell, { width: 100, borderRightWidth: 1, borderRightColor: '#000' }]}>
+                <Text style={[docStyles.tableCell, { width: 25 }]}>{idx + 1}</Text>
+                <Text style={[docStyles.tableCellLeft, { width: 100 }]}>
                   {b.dependenciaNombre || '-'}
                 </Text>
-                <Text style={[docStyles.tableCell, { flex: 1, borderRightWidth: 1, borderRightColor: '#000' }]}>
+                <Text style={[docStyles.tableCellLeft, { flex: 1 }]}>
                   {buildDescripcion(b)}
                 </Text>
                 <Text style={[docStyles.tableCellLast, { width: 40 }]}>1</Text>

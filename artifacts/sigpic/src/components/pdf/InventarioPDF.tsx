@@ -77,7 +77,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
         <View style={docStyles.table}>
           <View style={docStyles.tableHeader}>
             {colHeaders.map((h, i) => (
-              <Text key={i} style={[docStyles.tableHeaderText, { width: colWidths[i], borderRightWidth: i < colHeaders.length - 1 ? 1 : 0, borderRightColor: '#000' }]}>{h}</Text>
+              <Text key={i} style={[docStyles.tableHeaderText, { width: colWidths[i] }]}>{h}</Text>
             ))}
           </View>
           {bienes.length === 0 ? (
@@ -87,16 +87,16 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
           ) : (
             bienes.map((b, idx) => (
               <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                <Text style={[docStyles.tableCell, { width: colWidths[0], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.codigoInterno || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[1], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.numeroPatrimonial || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[2], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.numeroSerie || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[3], borderRightWidth: 1, borderRightColor: '#000', fontFamily: 'Times-Bold' }]}>{b.nombre}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[4], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.categoriaNombre || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[5], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.marca || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[6], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.modelo || '-'}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[7], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.cantidad || 1}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[8], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.estadoFisico}</Text>
-                <Text style={[docStyles.tableCell, { width: colWidths[9], borderRightWidth: 1, borderRightColor: '#000' }]}>{b.estadoAdministrativo}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[0] }]}>{b.codigoInterno || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[1] }]}>{b.numeroPatrimonial || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[2] }]}>{b.numeroSerie || '-'}</Text>
+                <Text style={[docStyles.tableCellLeft, { width: colWidths[3], fontFamily: 'Times-Bold' }]}>{b.nombre}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[4] }]}>{b.categoriaNombre || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[5] }]}>{b.marca || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[6] }]}>{b.modelo || '-'}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[7] }]}>{b.cantidad || 1}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[8] }]}>{b.estadoFisico}</Text>
+                <Text style={[docStyles.tableCell, { width: colWidths[9] }]}>{b.estadoAdministrativo}</Text>
                 <Text style={[docStyles.tableCellLast, { width: colWidths[10] }]}>{b.dependenciaNombre || '-'}</Text>
               </View>
             ))
