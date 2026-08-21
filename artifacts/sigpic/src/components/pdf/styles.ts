@@ -122,7 +122,7 @@ export const docStyles = StyleSheet.create({
     alignItems: 'center',
   },
   tableRowAlt: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
   },
   tableCell: {
     fontSize: 8,
