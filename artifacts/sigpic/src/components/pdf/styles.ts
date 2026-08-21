@@ -144,6 +144,11 @@ export const docStyles = StyleSheet.create({
     textAlign: 'center',
     justifyContent: 'center',
   },
+  columnSeparator: {
+    width: 1,
+    backgroundColor: '#000',
+    alignSelf: 'stretch',
+  },
 
   /* ─── SECTION TITLE ──────────────────────────────────────── */
   sectionTitle: {
