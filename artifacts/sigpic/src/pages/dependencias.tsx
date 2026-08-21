@@ -56,7 +56,7 @@ export default function Dependencias() {
 
   const createForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { nombre: '', edificio: '', piso: '', ubicacion: '', descripcion: '', responsableId: '', observaciones: '' }
+    defaultValues: { nombre: '', edificio: '', piso: '', ubicacion: '', descripcion: '', responsableId: undefined, observaciones: '' }
   });
 
   const editForm = useForm<z.infer<typeof formSchema>>({
@@ -186,7 +186,7 @@ export default function Dependencias() {
                 <FormField control={createForm.control} name="responsableId" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Responsable de Dependencia</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <Select onValueChange={(v) => field.onChange(v || undefined)} value={field.value || ''}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Seleccione responsable" /></SelectTrigger></FormControl>
                       <SelectContent>
                         {responsables?.map(r => (
@@ -255,7 +255,7 @@ export default function Dependencias() {
                 <FormField control={editForm.control} name="responsableId" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Responsable de Dependencia</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <Select onValueChange={(v) => field.onChange(v || undefined)} value={field.value || ''}>
                       <FormControl><SelectTrigger><SelectValue placeholder="Seleccione responsable" /></SelectTrigger></FormControl>
                       <SelectContent>
                         {responsables?.map(r => (
