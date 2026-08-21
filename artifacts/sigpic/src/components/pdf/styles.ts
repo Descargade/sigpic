@@ -148,6 +148,7 @@ export const docStyles = StyleSheet.create({
     width: 1,
     backgroundColor: '#000',
     alignSelf: 'stretch',
+    marginBottom: -6,
   },
 
   /* ─── SECTION TITLE ──────────────────────────────────────── */
