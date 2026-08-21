@@ -80,7 +80,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
               {colHeaders.map((h, i) => (
                 <React.Fragment key={i}>
                   <View style={{ width: colWidths[i] }}><Text style={docStyles.tableHeaderText}>{h}</Text></View>
-                  {i < colHeaders.length - 1 && <View style={{ width: 1, backgroundColor: '#000' }} />}
+                  {i < colHeaders.length - 1 && <View style={docStyles.columnSeparator} />}
                 </React.Fragment>
               ))}
             </View>
@@ -92,25 +92,25 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
               bienes.map((b, idx) => (
                 <View key={b.id} wrap={false} style={[docStyles.tableRow, idx % 2 === 0 && docStyles.tableRowAlt]}>
                   <View style={{ width: colWidths[0] }}><Text style={docStyles.tableCell}>{b.codigoInterno || '-'}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[1] }}><Text style={docStyles.tableCell}>{b.numeroPatrimonial || '-'}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[2] }}><Text style={docStyles.tableCell}>{b.numeroSerie || '-'}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[3] }}><Text style={[docStyles.tableCellLeft, { fontFamily: 'Times-Bold' }]}>{b.nombre}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[4] }}><Text style={docStyles.tableCell}>{b.categoriaNombre || '-'}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[5] }}><Text style={docStyles.tableCell}>{b.marca || '-'}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[6] }}><Text style={docStyles.tableCell}>{b.modelo || '-'}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[7] }}><Text style={docStyles.tableCell}>{b.cantidad || 1}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[8] }}><Text style={docStyles.tableCell}>{b.estadoFisico}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[9] }}><Text style={docStyles.tableCell}>{b.estadoAdministrativo}</Text></View>
-                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={docStyles.columnSeparator} />
                   <View style={{ width: colWidths[10] }}><Text style={docStyles.tableCellLast}>{b.dependenciaNombre || '-'}</Text></View>
                 </View>
               ))
