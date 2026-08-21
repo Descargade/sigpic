@@ -79,12 +79,9 @@ export function ActaResponsabilidadPDF({
 
         <View style={docStyles.table}>
           <View fixed style={docStyles.tableHeader}>
-            <View style={{ width: 25 }}><Text style={docStyles.tableHeaderText}>N°</Text></View>
-            <View style={docStyles.columnSeparator} />
-            <View style={{ width: 100 }}><Text style={docStyles.tableHeaderText}>UBICACION</Text></View>
-            <View style={docStyles.columnSeparator} />
-            <View style={{ flex: 1 }}><Text style={docStyles.tableHeaderText}>DESCRIPCION</Text></View>
-            <View style={docStyles.columnSeparator} />
+            <View style={{ width: 25, borderRightWidth: 1, borderRightColor: '#000' }}><Text style={docStyles.tableHeaderText}>N°</Text></View>
+            <View style={{ width: 100, borderRightWidth: 1, borderRightColor: '#000' }}><Text style={docStyles.tableHeaderText}>UBICACION</Text></View>
+            <View style={{ flex: 1, borderRightWidth: 1, borderRightColor: '#000' }}><Text style={docStyles.tableHeaderText}>DESCRIPCION</Text></View>
             <View style={{ width: 40 }}><Text style={docStyles.tableHeaderText}>CANT</Text></View>
           </View>
           {bienes.length === 0 ? (
@@ -94,12 +91,9 @@ export function ActaResponsabilidadPDF({
           ) : (
             bienes.map((b, idx) => (
               <View key={b.id} wrap={false} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                <View style={{ width: 25 }}><Text style={docStyles.tableCell}>{idx + 1}</Text></View>
-                <View style={docStyles.columnSeparator} />
-                <View style={{ width: 100 }}><Text style={docStyles.tableCellLeft}>{b.dependenciaNombre || '-'}</Text></View>
-                <View style={docStyles.columnSeparator} />
-                <View style={{ flex: 1 }}><Text style={docStyles.tableCellLeft}>{buildDescripcion(b)}</Text></View>
-                <View style={docStyles.columnSeparator} />
+                <View style={{ width: 25, borderRightWidth: 1, borderRightColor: '#000' }}><Text style={docStyles.tableCell}>{idx + 1}</Text></View>
+                <View style={{ width: 100, borderRightWidth: 1, borderRightColor: '#000' }}><Text style={docStyles.tableCellLeft}>{b.dependenciaNombre || '-'}</Text></View>
+                <View style={{ flex: 1, borderRightWidth: 1, borderRightColor: '#000' }}><Text style={docStyles.tableCellLeft}>{buildDescripcion(b)}</Text></View>
                 <View style={{ width: 40 }}><Text style={docStyles.tableCellLast}>1</Text></View>
               </View>
             ))
