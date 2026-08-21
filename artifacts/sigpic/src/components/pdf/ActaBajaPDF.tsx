@@ -88,21 +88,19 @@ export function ActaBajaPDF({
         <Text style={docStyles.docSubtitle}>{parrafo}</Text>
 
         <View style={docStyles.table}>
-          <View style={{ position: 'relative' }}>
-            <View style={docStyles.tableHeader}>
-              <Text style={[docStyles.tableHeaderText, { width: 30 }]}>#</Text>
-              <Text style={[docStyles.tableHeaderText, { flex: 1 }]}>DESCRIPCION</Text>
-              <Text style={[docStyles.tableHeaderText, { width: 50 }]}>CANT.</Text>
-            </View>
-            <View style={[docStyles.tableRow, docStyles.tableRowAlt]}>
-              <Text style={[docStyles.tableCell, { width: 30 }]}>1</Text>
-              <Text style={[docStyles.tableCellLeft, { flex: 1 }]}>
-                {buildDescripcion(bien)}
-              </Text>
-              <Text style={[docStyles.tableCellLast, { width: 50 }]}>1</Text>
-            </View>
-            <View style={{ position: 'absolute', left: 34, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
-            <View style={{ position: 'absolute', left: 468, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
+          <View fixed style={docStyles.tableHeader}>
+            <View style={{ width: 30 }}><Text style={docStyles.tableHeaderText}>#</Text></View>
+            <View style={{ width: 1, backgroundColor: '#000' }} />
+            <View style={{ flex: 1 }}><Text style={docStyles.tableHeaderText}>DESCRIPCION</Text></View>
+            <View style={{ width: 1, backgroundColor: '#000' }} />
+            <View style={{ width: 50 }}><Text style={docStyles.tableHeaderText}>CANT.</Text></View>
+          </View>
+          <View wrap={false} style={[docStyles.tableRow, docStyles.tableRowAlt]}>
+            <View style={{ width: 30 }}><Text style={docStyles.tableCell}>1</Text></View>
+            <View style={{ width: 1, backgroundColor: '#000' }} />
+            <View style={{ flex: 1 }}><Text style={docStyles.tableCellLeft}>{buildDescripcion(bien)}</Text></View>
+            <View style={{ width: 1, backgroundColor: '#000' }} />
+            <View style={{ width: 50 }}><Text style={docStyles.tableCellLast}>1</Text></View>
           </View>
         </View>
 
@@ -110,27 +108,26 @@ export function ActaBajaPDF({
           <>
             <Text style={docStyles.sectionTitle}>Historial de Movimientos</Text>
             <View style={docStyles.table}>
-              <View style={{ position: 'relative' }}>
-                <View style={docStyles.tableHeader}>
-                  <Text style={[docStyles.tableHeaderText, { width: 70 }]}>Fecha</Text>
-                  <Text style={[docStyles.tableHeaderText, { width: 90 }]}>Tipo</Text>
-                  <Text style={[docStyles.tableHeaderText, { flex: 1 }]}>Descripción</Text>
-                  <Text style={[docStyles.tableHeaderText, { width: 80 }]}>Usuario</Text>
-                </View>
-                {movimientos.map((m, idx) => (
-                  <View key={idx} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                    <Text style={[docStyles.tableCell, { width: 70 }]}>
-                      {new Date(m.fecha).toLocaleDateString('es-AR')}
-                    </Text>
-                    <Text style={[docStyles.tableCell, { width: 90, fontFamily: 'Times-Bold' }]}>{m.tipo}</Text>
-                    <Text style={[docStyles.tableCellLeft, { flex: 1 }]}>{m.descripcion || '-'}</Text>
-                    <Text style={[docStyles.tableCellLast, { width: 80 }]}>{m.usuario}</Text>
-                  </View>
-                ))}
-                <View style={{ position: 'absolute', left: 74, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
-                <View style={{ position: 'absolute', left: 164, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
-                <View style={{ position: 'absolute', left: 428, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
+              <View fixed style={docStyles.tableHeader}>
+                <View style={{ width: 70 }}><Text style={docStyles.tableHeaderText}>Fecha</Text></View>
+                <View style={{ width: 1, backgroundColor: '#000' }} />
+                <View style={{ width: 90 }}><Text style={docStyles.tableHeaderText}>Tipo</Text></View>
+                <View style={{ width: 1, backgroundColor: '#000' }} />
+                <View style={{ flex: 1 }}><Text style={docStyles.tableHeaderText}>Descripción</Text></View>
+                <View style={{ width: 1, backgroundColor: '#000' }} />
+                <View style={{ width: 80 }}><Text style={docStyles.tableHeaderText}>Usuario</Text></View>
               </View>
+              {movimientos.map((m, idx) => (
+                <View key={idx} wrap={false} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
+                  <View style={{ width: 70 }}><Text style={docStyles.tableCell}>{new Date(m.fecha).toLocaleDateString('es-AR')}</Text></View>
+                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={{ width: 90 }}><Text style={[docStyles.tableCell, { fontFamily: 'Times-Bold' }]}>{m.tipo}</Text></View>
+                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={{ flex: 1 }}><Text style={docStyles.tableCellLeft}>{m.descripcion || '-'}</Text></View>
+                  <View style={{ width: 1, backgroundColor: '#000' }} />
+                  <View style={{ width: 80 }}><Text style={docStyles.tableCellLast}>{m.usuario}</Text></View>
+                </View>
+              ))}
             </View>
           </>
         )}

@@ -78,35 +78,32 @@ export function ActaResponsabilidadPDF({
         <Text style={docStyles.docSubtitle}>{parrafo}</Text>
 
         <View style={docStyles.table}>
-          <View style={{ position: 'relative' }}>
-            <View style={docStyles.tableHeader}>
-              <Text style={[docStyles.tableHeaderText, { width: 25 }]}>N°</Text>
-              <Text style={[docStyles.tableHeaderText, { width: 100 }]}>UBICACION</Text>
-              <Text style={[docStyles.tableHeaderText, { flex: 1 }]}>DESCRIPCION</Text>
-              <Text style={[docStyles.tableHeaderText, { width: 40 }]}>CANT</Text>
-            </View>
-            {bienes.length === 0 ? (
-              <View style={docStyles.tableRow}>
-                <Text style={docStyles.noData}>No hay bienes asignados a este responsable</Text>
-              </View>
-            ) : (
-              bienes.map((b, idx) => (
-                <View key={b.id} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
-                  <Text style={[docStyles.tableCell, { width: 25 }]}>{idx + 1}</Text>
-                  <Text style={[docStyles.tableCellLeft, { width: 100 }]}>
-                    {b.dependenciaNombre || '-'}
-                  </Text>
-                  <Text style={[docStyles.tableCellLeft, { flex: 1 }]}>
-                    {buildDescripcion(b)}
-                  </Text>
-                  <Text style={[docStyles.tableCellLast, { width: 40 }]}>1</Text>
-                </View>
-              ))
-            )}
-            <View style={{ position: 'absolute', left: 29, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
-            <View style={{ position: 'absolute', left: 129, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
-            <View style={{ position: 'absolute', left: 468, top: 0, bottom: 0, width: 1, backgroundColor: '#000' }} />
+          <View fixed style={docStyles.tableHeader}>
+            <View style={{ width: 25 }}><Text style={docStyles.tableHeaderText}>N°</Text></View>
+            <View style={{ width: 1, backgroundColor: '#000' }} />
+            <View style={{ width: 100 }}><Text style={docStyles.tableHeaderText}>UBICACION</Text></View>
+            <View style={{ width: 1, backgroundColor: '#000' }} />
+            <View style={{ flex: 1 }}><Text style={docStyles.tableHeaderText}>DESCRIPCION</Text></View>
+            <View style={{ width: 1, backgroundColor: '#000' }} />
+            <View style={{ width: 40 }}><Text style={docStyles.tableHeaderText}>CANT</Text></View>
           </View>
+          {bienes.length === 0 ? (
+            <View style={docStyles.tableRow}>
+              <Text style={docStyles.noData}>No hay bienes asignados a este responsable</Text>
+            </View>
+          ) : (
+            bienes.map((b, idx) => (
+              <View key={b.id} wrap={false} style={idx % 2 === 0 ? [docStyles.tableRow, docStyles.tableRowAlt] : docStyles.tableRow}>
+                <View style={{ width: 25 }}><Text style={docStyles.tableCell}>{idx + 1}</Text></View>
+                <View style={{ width: 1, backgroundColor: '#000' }} />
+                <View style={{ width: 100 }}><Text style={docStyles.tableCellLeft}>{b.dependenciaNombre || '-'}</Text></View>
+                <View style={{ width: 1, backgroundColor: '#000' }} />
+                <View style={{ flex: 1 }}><Text style={docStyles.tableCellLeft}>{buildDescripcion(b)}</Text></View>
+                <View style={{ width: 1, backgroundColor: '#000' }} />
+                <View style={{ width: 40 }}><Text style={docStyles.tableCellLast}>1</Text></View>
+              </View>
+            ))
+          )}
         </View>
 
         <View style={docStyles.signatureSection}>
