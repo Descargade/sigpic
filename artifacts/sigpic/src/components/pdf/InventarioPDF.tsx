@@ -76,7 +76,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
 
         <View style={docStyles.table}>
           <View>
-            <View style={docStyles.tableHeader}>
+            <View fixed style={docStyles.tableHeader}>
               {colHeaders.map((h, i) => (
                 <React.Fragment key={i}>
                   <View style={{ width: colWidths[i] }}><Text style={docStyles.tableHeaderText}>{h}</Text></View>
@@ -90,7 +90,7 @@ export function InventarioPDF({ titulo, subtitulo, bienes, filtros, institucion 
               </View>
             ) : (
               bienes.map((b, idx) => (
-                <View key={b.id} style={[docStyles.tableRow, idx % 2 === 0 && docStyles.tableRowAlt]}>
+                <View key={b.id} wrap={false} style={[docStyles.tableRow, idx % 2 === 0 && docStyles.tableRowAlt]}>
                   <View style={{ width: colWidths[0] }}><Text style={docStyles.tableCell}>{b.codigoInterno || '-'}</Text></View>
                   <View style={{ width: 1, backgroundColor: '#000' }} />
                   <View style={{ width: colWidths[1] }}><Text style={docStyles.tableCell}>{b.numeroPatrimonial || '-'}</Text></View>
