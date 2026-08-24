@@ -102351,6 +102351,8 @@ var DeleteCategoriaResponse = _void2();
 var ListDependenciasResponseItem = object({
   "id": number2(),
   "nombre": string2(),
+  "edificio": string2().nullish(),
+  "piso": string2().nullish(),
   "ubicacion": string2().nullish(),
   "descripcion": string2().nullish(),
   "responsableId": int().nullish(),
@@ -102361,6 +102363,8 @@ var ListDependenciasResponseItem = object({
 var ListDependenciasResponse = array(ListDependenciasResponseItem);
 var CreateDependenciaBody = object({
   "nombre": string2().min(1),
+  "edificio": string2().optional(),
+  "piso": string2().optional(),
   "ubicacion": string2().optional(),
   "descripcion": string2().optional(),
   "responsableId": number2().optional(),
@@ -102369,6 +102373,8 @@ var CreateDependenciaBody = object({
 var CreateDependenciaResponse = object({
   "id": number2(),
   "nombre": string2(),
+  "edificio": string2().nullish(),
+  "piso": string2().nullish(),
   "ubicacion": string2().nullish(),
   "descripcion": string2().nullish(),
   "responsableId": int().nullish(),
@@ -102382,6 +102388,8 @@ var GetDependenciaParams = object({
 var GetDependenciaResponse = object({
   "id": number2(),
   "nombre": string2(),
+  "edificio": string2().nullish(),
+  "piso": string2().nullish(),
   "ubicacion": string2().nullish(),
   "descripcion": string2().nullish(),
   "responsableId": int().nullish(),
@@ -102394,6 +102402,8 @@ var UpdateDependenciaParams = object({
 });
 var UpdateDependenciaBody = object({
   "nombre": string2().min(1).optional(),
+  "edificio": string2().nullish(),
+  "piso": string2().nullish(),
   "ubicacion": string2().nullish(),
   "descripcion": string2().nullish(),
   "responsableId": int().nullish(),
@@ -102402,6 +102412,8 @@ var UpdateDependenciaBody = object({
 var UpdateDependenciaResponse = object({
   "id": number2(),
   "nombre": string2(),
+  "edificio": string2().nullish(),
+  "piso": string2().nullish(),
   "ubicacion": string2().nullish(),
   "descripcion": string2().nullish(),
   "responsableId": int().nullish(),
@@ -110198,6 +110210,8 @@ var insertCategoriaSchema = createInsertSchema(categoriasTable).omit({
 var dependenciasTable = pgTable("dependencias", {
   id: serial("id").primaryKey(),
   nombre: text("nombre").notNull(),
+  edificio: text("edificio"),
+  piso: text("piso"),
   ubicacion: text("ubicacion"),
   descripcion: text("descripcion"),
   responsableId: integer2("responsable_id"),
@@ -110314,6 +110328,8 @@ if (!process.env.DATABASE_URL) {
 }
 var pool = new Pool3({ connectionString: process.env.DATABASE_URL });
 var db = drizzle(pool, { schema: schema_exports });
+pool.query("ALTER TABLE dependencias ADD COLUMN IF NOT EXISTS edificio text").catch(() => {});
+pool.query("ALTER TABLE dependencias ADD COLUMN IF NOT EXISTS piso text").catch(() => {});
 
 // src/lib/logger.ts
 var import_pino = __toESM(require_pino(), 1);
