@@ -1,17 +1,15 @@
-import { type ReactNode } from 'react'
-import { Sidebar } from './sidebar'
+import React from 'react';
+import { Sidebar } from './sidebar';
 
-interface AppLayoutProps {
-  children: ReactNode
-}
-
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
-      <main className="pl-64">
-        <div className="container mx-auto max-w-7xl p-6">{children}</div>
+      <main className="flex-1 overflow-y-auto">
+        <div className="min-h-full flex flex-col md:pl-0 pl-14">
+          {children}
+        </div>
       </main>
     </div>
-  )
+  );
 }
