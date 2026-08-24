@@ -66,13 +66,16 @@ export default function Dependencias() {
   const onCreateSubmit = (values: z.infer<typeof formSchema>) => {
     const payload: any = { ...values };
     if (values.responsableId) payload.responsableId = Number(values.responsableId);
-    else payload.responsableId = null;
+    else delete payload.responsableId;
     createDep.mutate({ data: payload }, {
       onSuccess: () => {
         toast({ title: "Dependencia creada" });
         queryClient.invalidateQueries({ queryKey: ["/api/dependencias"] });
         setIsCreateOpen(false);
         createForm.reset();
+      },
+      onError: () => {
+        toast({ variant: "destructive", title: "Error", description: "No se pudo crear la dependencia." });
       }
     });
   };
@@ -81,13 +84,16 @@ export default function Dependencias() {
     if (!itemToEdit) return;
     const payload: any = { ...values };
     if (values.responsableId) payload.responsableId = Number(values.responsableId);
-    else payload.responsableId = null;
+    else delete payload.responsableId;
     updateDep.mutate({ id: itemToEdit.id, data: payload }, {
       onSuccess: () => {
         toast({ title: "Dependencia actualizada" });
         queryClient.invalidateQueries({ queryKey: ["/api/dependencias"] });
         setIsEditOpen(false);
         setItemToEdit(null);
+      },
+      onError: () => {
+        toast({ variant: "destructive", title: "Error", description: "No se pudo actualizar la dependencia." });
       }
     });
   };
