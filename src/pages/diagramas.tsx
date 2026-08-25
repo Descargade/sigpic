@@ -73,6 +73,7 @@ function pisoSort(a?: string | null, b?: string | null): number {
 const NODE_H: Record<string, number> = {
   institucion: 72,
   edificio: 80,
+  piso: 60,
   responsable: 68,
   dependencia: 140,
   grupo: 84,
@@ -111,7 +112,9 @@ const EDIFICIO_COLORS_DARK: Record<string, string> = {
 
 const EDGE_COLORS: Record<string, string> = {
   'institucion-edificio': '#4f46e5',
+  'institucion-piso': '#6366f1',
   'edificio-responsable': '#6366f1',
+  'piso-responsable': '#8b5cf6',
   'responsable-dependencia': '#0891b2',
   'dependencia-grupo': '#059669',
 };
@@ -119,6 +122,16 @@ const EDGE_COLORS: Record<string, string> = {
 const EDIFICIO_COLORS: Record<string, string> = {
   'Edificio Roca': '#1e40af',
   'Edificio Area': '#0369a1',
+};
+
+const PISO_COLORS: Record<string, string> = {
+  'Subsuelo': '#64748b',
+  'Planta Baja': '#059669',
+  'Piso 1': '#0284c7',
+  'Piso 2': '#0369a1',
+  'Piso 3': '#1e40af',
+  'Piso 4': '#1e3a8a',
+  'Piso 5': '#312e81',
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -208,68 +221,89 @@ function buildTree(dependencias: any[], bienes: any[]): TreeNode[] {
   for (const edName of edificioNames) {
     const edDeps = edificioMap.get(edName)!;
     const edBienes = bienes.filter(b => edDeps.some((d: any) => d.id === b.dependenciaId));
-    const respMap = new Map<string, any[]>();
 
+    // Group by piso
+    const pisoMap = new Map<string, any[]>();
     for (const dep of edDeps) {
-      const rKey = dep.responsableId ? String(dep.responsableId) : '__none__';
-      if (!respMap.has(rKey)) respMap.set(rKey, []);
-      respMap.get(rKey)!.push(dep);
+      const p = dep.piso || 'Sin Piso';
+      if (!pisoMap.has(p)) pisoMap.set(p, []);
+      pisoMap.get(p)!.push(dep);
     }
 
-    const respNodes: TreeNode[] = [];
-    const sortedRespKeys = Array.from(respMap.keys()).sort((a, b) => {
-      const aDeps = respMap.get(a)!;
-      const bDeps = respMap.get(b)!;
-      return pisoSort(aDeps[0]?.piso, bDeps[0]?.piso);
-    });
+    const sortedPisos = Array.from(pisoMap.keys()).sort((a, b) => pisoSort(a, b));
+    const pisoNodes: TreeNode[] = [];
 
-    for (const rKey of sortedRespKeys) {
-      const rDeps = respMap.get(rKey)!;
-      const rName = rDeps[0].responsableNombre || 'Sin Responsable';
-      const rCargos = [...new Set(rDeps.map((d: any) => d.responsableCargo).filter(Boolean))];
+    for (const pisoName of sortedPisos) {
+      const pisoDeps = pisoMap.get(pisoName)!;
 
-      const sortedDeps = [...rDeps].sort((a, b) => pisoSort(a.piso, b.piso));
-      const depNodes: TreeNode[] = sortedDeps.map(dep => {
-        const depBienes = bienes.filter(b => b.dependenciaId === dep.id && !b.parentId);
-        const groups = groupBienes(depBienes);
-        const grupoNodes: TreeNode[] = groups.map(grupo => ({
-          id: `grupo-${dep.id}-${grupo.key}`,
-          type: 'grupo',
+      // Group by responsable within piso
+      const respMap = new Map<string, any[]>();
+      for (const dep of pisoDeps) {
+        const rKey = dep.responsableId ? String(dep.responsableId) : '__none__';
+        if (!respMap.has(rKey)) respMap.set(rKey, []);
+        respMap.get(rKey)!.push(dep);
+      }
+
+      const sortedRespKeys = Array.from(respMap.keys()).sort();
+      const respNodes: TreeNode[] = [];
+
+      for (const rKey of sortedRespKeys) {
+        const rDeps = respMap.get(rKey)!;
+        const rName = rDeps[0].responsableNombre || 'Sin Responsable';
+        const rCargos = [...new Set(rDeps.map((d: any) => d.responsableCargo).filter(Boolean))];
+
+        const depNodes: TreeNode[] = rDeps.map(dep => {
+          const depBienes = bienes.filter(b => b.dependenciaId === dep.id && !b.parentId);
+          const groups = groupBienes(depBienes);
+          const grupoNodes: TreeNode[] = groups.map(grupo => ({
+            id: `grupo-${dep.id}-${grupo.key}`,
+            type: 'grupo',
+            data: {
+              label: grupo.label,
+              total: grupo.total,
+              bienes: grupo.bienes,
+              dependenciaId: dep.id,
+            },
+            children: [],
+          }));
+
+          return {
+            id: `dep-${dep.id}`,
+            type: 'dependencia',
+            data: {
+              label: dep.nombre,
+              edificio: dep.edificio || 'Sin Edificio',
+              piso: dep.piso || 'Sin Piso',
+              responsable: rName,
+              bienesCount: depBienes.length,
+              ubicacion: dep.ubicacion,
+              grupos: groups.map(g => `${g.label} — ${g.total}`),
+            },
+            children: grupoNodes,
+          };
+        });
+
+        respNodes.push({
+          id: `resp-${edName}-${pisoName}-${rKey}`,
+          type: 'responsable',
           data: {
-            label: grupo.label,
-            total: grupo.total,
-            bienes: grupo.bienes,
-            dependenciaId: dep.id,
+            label: rName,
+            cargo: rCargos.join(', ') || undefined,
+            dependenciasCount: rDeps.length,
+            edificio: edName,
           },
-          children: [],
-        }));
+          children: depNodes,
+        });
+      }
 
-        return {
-          id: `dep-${dep.id}`,
-          type: 'dependencia',
-          data: {
-            label: dep.nombre,
-            edificio: dep.edificio || 'Sin Edificio',
-            piso: dep.piso || 'Sin Piso',
-            responsable: rName,
-            bienesCount: depBienes.length,
-            ubicacion: dep.ubicacion,
-            grupos: groups.map(g => `${g.label} — ${g.total}`),
-          },
-          children: grupoNodes,
-        };
-      });
-
-      respNodes.push({
-        id: `resp-${edName}-${rKey}`,
-        type: 'responsable',
+      pisoNodes.push({
+        id: `piso-${edName}-${pisoName}`,
+        type: 'piso',
         data: {
-          label: rName,
-          cargo: rCargos.join(', ') || undefined,
-          dependenciasCount: rDeps.length,
-          edificio: edName,
+          label: pisoName,
+          dependenciasCount: pisoDeps.length,
         },
-        children: depNodes,
+        children: respNodes,
       });
     }
 
@@ -278,12 +312,12 @@ function buildTree(dependencias: any[], bienes: any[]): TreeNode[] {
       type: 'edificio',
       data: {
         label: edName,
-        responsablesCount: respNodes.length,
+        responsablesCount: pisoNodes.reduce((sum, p) => sum + p.children.length, 0),
         dependenciasCount: edDeps.length,
         bienesCount: edBienes.length,
-        responsables: respNodes.map(r => r.data.label),
+        responsables: pisoNodes.flatMap(p => p.children.map(r => r.data.label)),
       },
-      children: respNodes,
+      children: pisoNodes,
     });
   }
 
@@ -355,15 +389,13 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
 
   if (tree.length === 0) {
     nodes.push({
-      id: 'institucion',
+      id: 'institucion-roca',
       type: 'institucion',
       position: { x: 40, y: 0 },
-      data: { label: 'Instituto', total: dependencias.length, bienesCount: bienes.length },
+      data: { label: 'Instituto Roca', total: 0, bienesCount: 0 },
     });
     return { nodes, edges };
   }
-
-  const INSTITUTO_H = NODE_H.institucion;
 
   // Calculate dimensions for each edificio panel
   const edificioDimensions = tree.map(ed => {
@@ -383,26 +415,22 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
     currentX += dim.panelW + PANEL_GAP;
   }
 
-  // Total width of all panels
-  const totalWidth = currentX - PANEL_GAP;
-  const maxPanelH = Math.max(...edificioDimensions.map(d => d.panelH));
-
-  // Instituto centered above all panels
-  const institucionX = 40 + totalWidth / 2 - NODE_W / 2;
-  const institucionY = 0;
-
-  nodes.push({
-    id: 'institucion',
-    type: 'institucion',
-    position: { x: institucionX, y: institucionY },
-    data: { label: 'Instituto', total: dependencias.length, bienesCount: bienes.length },
-  });
-
-  // Edificio nodes positioned inside each panel
+  // Create one Instituto node per edificio, centered above each panel
   for (let i = 0; i < tree.length; i++) {
     const ed = tree[i];
     const dim = edificioDimensions[i];
     const pos = panelPositions[i];
+
+    const instLabel = `Instituto ${ed.data.label.replace('Edificio ', '')}`;
+    const instX = pos.x + dim.panelW / 2 - NODE_W / 2;
+    const instY = -NODE_H.institucion - 20;
+
+    nodes.push({
+      id: `institucion-${ed.id}`,
+      type: 'institucion',
+      position: { x: instX, y: instY },
+      data: { label: instLabel, total: ed.data.dependenciasCount, bienesCount: ed.data.bienesCount },
+    });
 
     // Panel node (background container)
     nodes.push({
@@ -419,39 +447,29 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
       },
     });
 
-    // Edificio node (header) positioned inside the panel
-    const edX = pos.x + PANEL_PAD_X;
-    const edY = pos.y + PANEL_HEADER_H + 10;
-    nodes.push({
-      id: ed.id,
-      type: 'edificio',
-      position: { x: edX, y: edY },
-      data: ed.data,
-    });
-
-    // Edge from Instituto to Edificio
+    // Edge from Instituto to Panel
     edges.push({
       id: `e-inst-${ed.id}`,
-      source: 'institucion',
-      target: ed.id,
+      source: `institucion-${ed.id}`,
+      target: `panel-${ed.id}`,
       type: 'smoothstep',
       animated: true,
       style: { stroke: EDGE_COLORS['institucion-edificio'], strokeWidth: 2 },
       markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLORS['institucion-edificio'], width: 12, height: 12 },
     });
 
-    // Children positioned inside the panel, starting to the right of the edificio node
+    // Children (piso nodes) positioned inside the panel
     if (ed.children.length > 0) {
       const childHeights = ed.children.map(getSubtreeHeight);
       const totalChildH = childHeights.reduce((a, b) => a + b, 0) + (ed.children.length - 1) * V_GAP;
-      const subtreeStartY = edY + (NODE_H.edificio / 2) - totalChildH / 2;
+      const subtreeStartY = pos.y + PANEL_HEADER_H + (PANEL_PAD_TOP - PANEL_HEADER_H) / 2;
       let childY = subtreeStartY;
 
       for (let j = 0; j < ed.children.length; j++) {
         const child = ed.children[j];
         const childH = childHeights[j];
         const childCenter = childY + childH / 2;
-        positionSubtree(child, edX + NODE_W + H_GAP, childCenter, nodes, edges, ed.id, ed.type);
+        positionSubtree(child, pos.x + PANEL_PAD_X, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
         childY += childH + V_GAP;
       }
     }
@@ -540,6 +558,15 @@ function EdificioPanel({ data }: { data: any }) {
         </Badge>
       </div>
     </div>
+  );
+}
+
+function PisoNode({ data }: { data: any }) {
+  const color = PISO_COLORS[data.label] || '#64748b';
+  return (
+    <NodeShell color={color} icon={Layers} label={data.label}
+      sub={`${data.dependenciasCount} dependencias`}
+    />
   );
 }
 
@@ -647,6 +674,7 @@ const nodeTypes = {
   institucion: InstitucionNode,
   edificioPanel: EdificioPanel,
   edificio: EdificioNode,
+  piso: PisoNode,
   responsable: ResponsableNode,
   dependencia: DependenciaNode,
   grupo: GrupoNode,
