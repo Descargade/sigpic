@@ -55,7 +55,15 @@ import { es } from 'date-fns/locale';
 
 const NODE_W = 260;
 const H_GAP = 100;
-const V_GAP = 16;
+const V_GAP = 20;
+const COLUMN_GAP = 140;
+
+const PISO_ORDER: Record<string, number> = {
+  'Subsuelo': 0, 'Planta Baja': 1, 'Piso 1': 2, 'Piso 2': 3, 'Piso 3': 4, 'Piso 4': 5, 'Piso 5': 6,
+};
+function pisoSort(a?: string | null, b?: string | null): number {
+  return (PISO_ORDER[a || ''] ?? 99) - (PISO_ORDER[b || ''] ?? 99);
+}
 
 const NODE_H: Record<string, number> = {
   institucion: 72,
@@ -91,11 +99,21 @@ const COLORS_DARK = {
   bien: { bg: '#34d399', text: '#064e3b' },
 };
 
+const EDIFICIO_COLORS_DARK: Record<string, string> = {
+  'Edificio Roca': '#2563eb',
+  'Edificio Area': '#0284c7',
+};
+
 const EDGE_COLORS: Record<string, string> = {
   'institucion-edificio': '#4f46e5',
   'edificio-responsable': '#6366f1',
   'responsable-dependencia': '#0891b2',
   'dependencia-grupo': '#059669',
+};
+
+const EDIFICIO_COLORS: Record<string, string> = {
+  'Edificio Roca': '#1e40af',
+  'Edificio Area': '#0369a1',
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -194,11 +212,19 @@ function buildTree(dependencias: any[], bienes: any[]): TreeNode[] {
     }
 
     const respNodes: TreeNode[] = [];
-    for (const [rKey, rDeps] of respMap) {
+    const sortedRespKeys = Array.from(respMap.keys()).sort((a, b) => {
+      const aDeps = respMap.get(a)!;
+      const bDeps = respMap.get(b)!;
+      return pisoSort(aDeps[0]?.piso, bDeps[0]?.piso);
+    });
+
+    for (const rKey of sortedRespKeys) {
+      const rDeps = respMap.get(rKey)!;
       const rName = rDeps[0].responsableNombre || 'Sin Responsable';
       const rCargos = [...new Set(rDeps.map((d: any) => d.responsableCargo).filter(Boolean))];
 
-      const depNodes: TreeNode[] = rDeps.map(dep => {
+      const sortedDeps = [...rDeps].sort((a, b) => pisoSort(a.piso, b.piso));
+      const depNodes: TreeNode[] = sortedDeps.map(dep => {
         const depBienes = bienes.filter(b => b.dependenciaId === dep.id && !b.parentId);
         const groups = groupBienes(depBienes);
         const grupoNodes: TreeNode[] = groups.map(grupo => ({
@@ -331,7 +357,6 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
   const maxEdificioH = Math.max(...edificioHeights);
 
   // Position edificios horizontally, side by side
-  const COLUMN_GAP = 80;
   let currentX = 40;
 
   // Instituto node is centered above all edificios
@@ -409,8 +434,9 @@ function InstitucionNode({ data }: { data: any }) {
 }
 
 function EdificioNode({ data }: { data: any }) {
+  const bgColor = EDIFICIO_COLORS[data.label] || COLORS.edificio.bg;
   return (
-    <NodeShell color={COLORS.edificio.bg} icon={Building2} label={data.label}
+    <NodeShell color={bgColor} icon={Building2} label={data.label}
       sub={`${data.responsablesCount} responsables · ${data.dependenciasCount} dependencias`}
       badges={<Badge variant="secondary" className="bg-white/20 text-white border-0 text-[10px] shrink-0">{data.bienesCount} b</Badge>}
     >
@@ -856,7 +882,7 @@ function DiagramInner({
       )}
 
       {/* Canvas */}
-      <div ref={wrapperRef} className={`h-[650px] ${wide ? 'w-full' : 'max-w-[500px]'} border rounded-xl shadow-inner ${bgClass}`}>
+      <div ref={wrapperRef} className={`h-[900px] ${wide ? 'w-full' : 'max-w-[500px]'} border rounded-xl shadow-inner ${bgClass}`}>
         <ReactFlow
           nodes={nodesWithExpanded}
           edges={visibleEdges}
