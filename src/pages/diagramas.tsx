@@ -315,22 +315,42 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
   const tree = buildTree(dependencias, bienes);
   const nodes: Node[] = [];
   const edges: Edge[] = [];
-  const totalH = tree.reduce((sum, t) => sum + getSubtreeHeight(t), 0) + (tree.length - 1) * V_GAP * 2;
-  let y = totalH / 2;
+
+  if (tree.length === 0) {
+    nodes.push({
+      id: 'institucion',
+      type: 'institucion',
+      position: { x: 40, y: 0 },
+      data: { label: 'Instituto', total: dependencias.length, bienesCount: bienes.length },
+    });
+    return { nodes, edges };
+  }
+
+  // Calculate height of each edificio subtree
+  const edificioHeights = tree.map(ed => getSubtreeHeight(ed));
+  const maxEdificioH = Math.max(...edificioHeights);
+
+  // Position edificios horizontally, side by side
+  const COLUMN_GAP = 80;
+  let currentX = 40;
+
+  // Instituto node is centered above all edificios
+  const totalWidth = tree.reduce((sum, ed) => sum + NODE_W, 0) + (tree.length - 1) * COLUMN_GAP;
+  const institucionX = 40 + totalWidth / 2 - NODE_W / 2;
 
   nodes.push({
     id: 'institucion',
     type: 'institucion',
-    position: { x: LEVEL_X.institucion, y: 0 },
+    position: { x: institucionX, y: 0 },
     data: { label: 'Instituto', total: dependencias.length, bienesCount: bienes.length },
   });
 
-  const instH = Math.max(totalH, 100);
+  for (let i = 0; i < tree.length; i++) {
+    const ed = tree[i];
+    const edH = edificioHeights[i];
+    const edCenter = maxEdificioH / 2;
 
-  for (const ed of tree) {
-    const h = getSubtreeHeight(ed);
-    const edCenter = y + h / 2;
-
+    // Edge from Instituto to Edificio
     edges.push({
       id: `e-inst-${ed.id}`,
       source: 'institucion',
@@ -341,11 +361,9 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
       markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLORS['institucion-edificio'], width: 12, height: 12 },
     });
 
-    positionSubtree(ed, LEVEL_X.edificio, edCenter, nodes, edges);
-    y += h + V_GAP * 2;
+    positionSubtree(ed, currentX, edCenter, nodes, edges);
+    currentX += NODE_W + COLUMN_GAP;
   }
-
-  nodes[0].position.y = instH / 2 - NODE_H.institucion / 2;
 
   return { nodes, edges };
 }
@@ -548,11 +566,11 @@ function DiagramLegend({ show }: { show: boolean }) {
 
 function DiagramInner({
   initialNodes, initialEdges, isLoading, bgClass, downloadLabel, showLegend,
-  diagramKey, editMode, setEditMode,
+  diagramKey, editMode, setEditMode, wide,
 }: {
   initialNodes: Node[]; initialEdges: Edge[]; isLoading: boolean; bgClass: string;
   downloadLabel?: string; showLegend?: boolean; diagramKey: string;
-  editMode: boolean; setEditMode: (v: boolean) => void;
+  editMode: boolean; setEditMode: (v: boolean) => void; wide?: boolean;
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
@@ -695,15 +713,24 @@ function DiagramInner({
     if (!wrapperRef.current) return;
     setDownloading(true);
     try {
-      const dataUrl = await toPng(wrapperRef.current, {
+      // Fit view first to ensure all nodes are visible
+      fitView({ padding: 0.1 });
+      await new Promise(r => setTimeout(r, 300));
+
+      // Capture the ReactFlow viewport (contains all nodes, no height clipping)
+      const viewport = wrapperRef.current.querySelector('.react-flow__viewport') as HTMLElement;
+      const target = viewport || wrapperRef.current;
+
+      const dataUrl = await toPng(target, {
         backgroundColor: '#ffffff',
-        pixelRatio: 4,
+        pixelRatio: 6,
         quality: 1,
         cacheBust: true,
         filter: (node: any) => {
           if (node.classList?.contains('react-flow__controls')) return false;
           if (node.classList?.contains('react-flow__minimap')) return false;
           if (node.classList?.contains('react-flow__attribution')) return false;
+          if (node.classList?.contains('react-flow__background')) return false;
           return true;
         },
       });
@@ -718,7 +745,7 @@ function DiagramInner({
     } finally {
       setDownloading(false);
     }
-  }, [downloadLabel]);
+  }, [downloadLabel, fitView]);
 
   const onEdgeClick = useCallback((_: any, edge: Edge) => {
     if (editMode) {
@@ -829,7 +856,7 @@ function DiagramInner({
       )}
 
       {/* Canvas */}
-      <div ref={wrapperRef} className={`h-[650px] max-w-[500px] border rounded-xl shadow-inner ${bgClass}`}>
+      <div ref={wrapperRef} className={`h-[650px] ${wide ? 'w-full' : 'max-w-[500px]'} border rounded-xl shadow-inner ${bgClass}`}>
         <ReactFlow
           nodes={nodesWithExpanded}
           edges={visibleEdges}
@@ -865,11 +892,11 @@ function DiagramInner({
 
 function DiagramWrapper({
   initialNodes, initialEdges, isLoading, bgClass, downloadLabel, showLegend,
-  diagramKey, editMode, setEditMode,
+  diagramKey, editMode, setEditMode, wide,
 }: {
   initialNodes: Node[]; initialEdges: Edge[]; isLoading: boolean; bgClass: string;
   downloadLabel?: string; showLegend?: boolean; diagramKey: string;
-  editMode: boolean; setEditMode: (v: boolean) => void;
+  editMode: boolean; setEditMode: (v: boolean) => void; wide?: boolean;
 }) {
   return (
     <ReactFlowProvider>
@@ -877,7 +904,7 @@ function DiagramWrapper({
         initialNodes={initialNodes} initialEdges={initialEdges}
         isLoading={isLoading} bgClass={bgClass} downloadLabel={downloadLabel}
         showLegend={showLegend} diagramKey={diagramKey}
-        editMode={editMode} setEditMode={setEditMode}
+        editMode={editMode} setEditMode={setEditMode} wide={wide}
       />
     </ReactFlowProvider>
   );
@@ -999,7 +1026,7 @@ function DiagramaInstitucional({ showLegend, diagramKey, editMode, setEditMode }
         initialNodes={layoutNodes} initialEdges={layoutEdges}
         isLoading={isLoading} bgClass="bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30"
         downloadLabel="diagrama-institucional" showLegend={showLegend}
-        diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
+        diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode} wide
       />
     </div>
   );
