@@ -57,11 +57,13 @@ const NODE_W = 260;
 const H_GAP = 100;
 const V_GAP = 20;
 
-const PANEL_HEADER_H = 52;
+const PANEL_HEADER_H = 64;
 const PANEL_PAD_X = 40;
 const PANEL_PAD_TOP = 60;
 const PANEL_PAD_BOTTOM = 30;
 const PANEL_GAP = 220;
+const PANEL_SPLIT_THRESHOLD = 4;
+const COLUMN_INTERNAL_GAP = 60;
 
 const PISO_ORDER: Record<string, number> = {
   'Subsuelo': 0, 'Planta Baja': 1, 'Piso 1': 2, 'Piso 2': 3, 'Piso 3': 4, 'Piso 4': 5, 'Piso 5': 6,
@@ -401,7 +403,9 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
   const edificioDimensions = tree.map(ed => {
     const subtreeH = getSubtreeHeight(ed);
     const subtreeW = getSubtreeWidth(ed);
-    const panelW = subtreeW + PANEL_PAD_X * 2;
+    // Calcular ancho para posible división en dos columnas
+    const twoColumnW = 2 * (NODE_W + H_GAP) + COLUMN_INTERNAL_GAP;
+    const panelW = ed.children.length > PANEL_SPLIT_THRESHOLD ? twoColumnW + PANEL_PAD_X * 2 : subtreeW + PANEL_PAD_X * 2;
     const panelH = PANEL_HEADER_H + subtreeH + PANEL_PAD_TOP + PANEL_PAD_BOTTOM;
     return { subtreeH, subtreeW, panelW, panelH };
   });
@@ -461,16 +465,56 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
     // Children (piso nodes) positioned inside the panel
     if (ed.children.length > 0) {
       const childHeights = ed.children.map(getSubtreeHeight);
-      const totalChildH = childHeights.reduce((a, b) => a + b, 0) + (ed.children.length - 1) * V_GAP;
-      const subtreeStartY = pos.y + PANEL_HEADER_H + (PANEL_PAD_TOP - PANEL_HEADER_H) / 2;
-      let childY = subtreeStartY;
 
-      for (let j = 0; j < ed.children.length; j++) {
-        const child = ed.children[j];
-        const childH = childHeights[j];
-        const childCenter = childY + childH / 2;
-        positionSubtree(child, pos.x + PANEL_PAD_X, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
-        childY += childH + V_GAP;
+      // Dividir en dos columnas si hay más de PANEL_SPLIT_THRESHOLD pisos
+      if (ed.children.length > PANEL_SPLIT_THRESHOLD) {
+        const midpoint = Math.ceil(ed.children.length / 2);
+        const leftChildren = ed.children.slice(0, midpoint);
+        const rightChildren = ed.children.slice(midpoint);
+        const leftHeights = childHeights.slice(0, midpoint);
+        const rightHeights = childHeights.slice(midpoint);
+
+        // Ancho de cada columna más gap interno
+        const colWidth = NODE_W + H_GAP;
+        const leftX = pos.x + PANEL_PAD_X;
+        const rightX = pos.x + PANEL_PAD_X + colWidth + COLUMN_INTERNAL_GAP;
+
+        // Altura total de cada columna
+        const totalLeftH = leftHeights.reduce((a, b) => a + b, 0) + (leftHeights.length - 1) * V_GAP;
+        const totalRightH = rightHeights.reduce((a, b) => a + b, 0) + (rightHeights.length - 1) * V_GAP;
+
+        // Posicionar columna izquierda (empezando un poco abajo del header)
+        let leftY = pos.y + PANEL_HEADER_H + (PANEL_PAD_TOP - PANEL_HEADER_H) / 2;
+        for (let j = 0; j < leftChildren.length; j++) {
+          const child = leftChildren[j];
+          const childH = leftHeights[j];
+          const childCenter = leftY + childH / 2;
+          positionSubtree(child, leftX, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
+          leftY += childH + V_GAP;
+        }
+
+        // Posicionar columna derecha
+        let rightY = pos.y + PANEL_HEADER_H + (PANEL_PAD_TOP - PANEL_HEADER_H) / 2;
+        for (let j = 0; j < rightChildren.length; j++) {
+          const child = rightChildren[j];
+          const childH = rightHeights[j];
+          const childCenter = rightY + childH / 2;
+          positionSubtree(child, rightX, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
+          rightY += childH + V_GAP;
+        }
+      } else {
+        // Layout original de una sola columna
+        const totalChildH = childHeights.reduce((a, b) => a + b, 0) + (ed.children.length - 1) * V_GAP;
+        const subtreeStartY = pos.y + PANEL_HEADER_H + (PANEL_PAD_TOP - PANEL_HEADER_H) / 2;
+        let childY = subtreeStartY;
+
+        for (let j = 0; j < ed.children.length; j++) {
+          const child = ed.children[j];
+          const childH = childHeights[j];
+          const childCenter = childY + childH / 2;
+          positionSubtree(child, pos.x + PANEL_PAD_X, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
+          childY += childH + V_GAP;
+        }
       }
     }
   }
@@ -537,23 +581,23 @@ function EdificioNode({ data }: { data: any }) {
 
 function EdificioPanel({ data }: { data: any }) {
   const border = EDIFICIO_COLORS[data.label] || '#1e40af';
-  const bg = border + '12';
+  const bg = border + '14';
   return (
-    <div className="drag-handle" style={{ width: data.panelW, height: data.panelH }}>
+    <div className="drag-handle" style={{ width: data.panelW, height: data.panelH, borderRadius: 16 }}>
       <div className="absolute inset-0 rounded-2xl pointer-events-none"
-        style={{ background: bg, border: `2px dashed ${border}55` }} />
-      <div className="absolute top-0 left-0 right-0 flex items-center gap-3 px-5 rounded-t-2xl pointer-events-none"
-        style={{ height: PANEL_HEADER_H, borderBottom: `1px solid ${border}30` }}>
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: border }}>
-          <Building2 className="w-5 h-5 text-white" />
+        style={{ background: bg, border: `4px solid ${border}` }} />
+      <div className="absolute top-2 left-2 right-2 flex items-center gap-3 px-4 rounded-t-xl pointer-events-none"
+        style={{ height: PANEL_HEADER_H - 4, borderBottom: `2px solid ${border}55` }}>
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: border }}>
+          <Building2 className="w-6 h-6 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-sm truncate" style={{ color: border }}>{data.label}</div>
-          <div className="text-[11px]" style={{ color: border + 'bb' }}>
+          <div className="font-base font-bold truncate" style={{ color: border }}>{data.label}</div>
+          <div className="text-sm" style={{ color: border + 'aa' }}>
             {data.responsablesCount} responsables · {data.dependenciasCount} dependencias
           </div>
         </div>
-        <Badge variant="outline" className="text-[10px] shrink-0" style={{ color: border, borderColor: border + '44' }}>
+        <Badge variant="outline" className="text-[10px] shrink-0" style={{ color: border, borderColor: border + '55' }}>
           {data.bienesCount} bienes
         </Badge>
       </div>
