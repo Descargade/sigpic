@@ -385,6 +385,11 @@ function positionSubtree(
 }
 
 function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edges: Edge[] } {
+  // Manejo de datos nulos o vacíos
+  if (!dependencias || dependencias.length === 0 || !bienes || bienes.length === 0) {
+    return { nodes: [], edges: [] };
+  }
+
   const tree = buildTree(dependencias, bienes);
   const nodes: Node[] = [];
   const edges: Edge[] = [];
