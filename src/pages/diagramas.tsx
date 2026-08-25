@@ -56,7 +56,12 @@ import { es } from 'date-fns/locale';
 const NODE_W = 260;
 const H_GAP = 100;
 const V_GAP = 20;
-const COLUMN_GAP = 140;
+
+const PANEL_HEADER_H = 52;
+const PANEL_PAD_X = 40;
+const PANEL_PAD_TOP = 60;
+const PANEL_PAD_BOTTOM = 30;
+const PANEL_GAP = 220;
 
 const PISO_ORDER: Record<string, number> = {
   'Subsuelo': 0, 'Planta Baja': 1, 'Piso 1': 2, 'Piso 2': 3, 'Piso 3': 4, 'Piso 4': 5, 'Piso 5': 6,
@@ -296,6 +301,12 @@ function getSubtreeHeight(node: TreeNode): number {
   return Math.max(h, childTotal);
 }
 
+function getSubtreeWidth(node: TreeNode): number {
+  if (node.children.length === 0) return NODE_W;
+  const maxChildW = Math.max(...node.children.map(getSubtreeWidth));
+  return NODE_W + H_GAP + maxChildW;
+}
+
 function positionSubtree(
   node: TreeNode, x: number, yCenter: number,
   nodes: Node[], edges: Edge[], parentId?: string, parentType?: string
@@ -352,28 +363,71 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
     return { nodes, edges };
   }
 
-  // Calculate height of each edificio subtree
-  const edificioHeights = tree.map(ed => getSubtreeHeight(ed));
-  const maxEdificioH = Math.max(...edificioHeights);
+  const INSTITUTO_H = NODE_H.institucion;
 
-  // Position edificios horizontally, side by side
+  // Calculate dimensions for each edificio panel
+  const edificioDimensions = tree.map(ed => {
+    const subtreeH = getSubtreeHeight(ed);
+    const subtreeW = getSubtreeWidth(ed);
+    const panelW = subtreeW + PANEL_PAD_X * 2;
+    const panelH = PANEL_HEADER_H + subtreeH + PANEL_PAD_TOP + PANEL_PAD_BOTTOM;
+    return { subtreeH, subtreeW, panelW, panelH };
+  });
+
+  // Position panels side by side
   let currentX = 40;
+  const panelPositions: { x: number; y: number }[] = [];
 
-  // Instituto node is centered above all edificios
-  const totalWidth = tree.reduce((sum, ed) => sum + NODE_W, 0) + (tree.length - 1) * COLUMN_GAP;
+  for (const dim of edificioDimensions) {
+    panelPositions.push({ x: currentX, y: 0 });
+    currentX += dim.panelW + PANEL_GAP;
+  }
+
+  // Total width of all panels
+  const totalWidth = currentX - PANEL_GAP;
+  const maxPanelH = Math.max(...edificioDimensions.map(d => d.panelH));
+
+  // Instituto centered above all panels
   const institucionX = 40 + totalWidth / 2 - NODE_W / 2;
+  const institucionY = 0;
 
   nodes.push({
     id: 'institucion',
     type: 'institucion',
-    position: { x: institucionX, y: 0 },
+    position: { x: institucionX, y: institucionY },
     data: { label: 'Instituto', total: dependencias.length, bienesCount: bienes.length },
   });
 
+  // Edificio nodes positioned inside each panel
   for (let i = 0; i < tree.length; i++) {
     const ed = tree[i];
-    const edH = edificioHeights[i];
-    const edCenter = maxEdificioH / 2;
+    const dim = edificioDimensions[i];
+    const pos = panelPositions[i];
+
+    // Panel node (background container)
+    nodes.push({
+      id: `panel-${ed.id}`,
+      type: 'edificioPanel',
+      position: { x: pos.x, y: pos.y },
+      data: {
+        label: ed.data.label,
+        responsablesCount: ed.data.responsablesCount,
+        dependenciasCount: ed.data.dependenciasCount,
+        bienesCount: ed.data.bienesCount,
+        panelW: dim.panelW,
+        panelH: dim.panelH,
+      },
+    });
+
+    // Edificio node (header) positioned inside the panel
+    const edX = pos.x + PANEL_PAD_X;
+    const edY = pos.y + PANEL_HEADER_H + 10;
+    nodes.push({
+      id: ed.id,
+      type: 'edificio',
+      position: { x: edX, y: edY },
+      data: ed.data,
+    });
 
     // Edge from Instituto to Edificio
     edges.push({
@@ -386,8 +440,21 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
       markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLORS['institucion-edificio'], width: 12, height: 12 },
     });
 
-    positionSubtree(ed, currentX, edCenter, nodes, edges);
-    currentX += NODE_W + COLUMN_GAP;
+    // Children positioned inside the panel, starting to the right of the edificio node
+    if (ed.children.length > 0) {
+      const childHeights = ed.children.map(getSubtreeHeight);
+      const totalChildH = childHeights.reduce((a, b) => a + b, 0) + (ed.children.length - 1) * V_GAP;
+      const subtreeStartY = edY + (NODE_H.edificio / 2) - totalChildH / 2;
+      let childY = subtreeStartY;
+
+      for (let j = 0; j < ed.children.length; j++) {
+        const child = ed.children[j];
+        const childH = childHeights[j];
+        const childCenter = childY + childH / 2;
+        positionSubtree(child, edX + NODE_W + H_GAP, childCenter, nodes, edges, ed.id, ed.type);
+        childY += childH + V_GAP;
+      }
+    }
   }
 
   return { nodes, edges };
@@ -447,6 +514,32 @@ function EdificioNode({ data }: { data: any }) {
         {data.responsables?.length > 3 && <Badge variant="secondary" className="bg-white/15 text-white/80 border-0 text-[8px]">+{data.responsables.length - 3}</Badge>}
       </div>
     </NodeShell>
+  );
+}
+
+function EdificioPanel({ data }: { data: any }) {
+  const border = EDIFICIO_COLORS[data.label] || '#1e40af';
+  const bg = border + '12';
+  return (
+    <div className="drag-handle" style={{ width: data.panelW, height: data.panelH }}>
+      <div className="absolute inset-0 rounded-2xl pointer-events-none"
+        style={{ background: bg, border: `2px dashed ${border}55` }} />
+      <div className="absolute top-0 left-0 right-0 flex items-center gap-3 px-5 rounded-t-2xl pointer-events-none"
+        style={{ height: PANEL_HEADER_H, borderBottom: `1px solid ${border}30` }}>
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: border }}>
+          <Building2 className="w-5 h-5 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="font-bold text-sm truncate" style={{ color: border }}>{data.label}</div>
+          <div className="text-[11px]" style={{ color: border + 'bb' }}>
+            {data.responsablesCount} responsables · {data.dependenciasCount} dependencias
+          </div>
+        </div>
+        <Badge variant="outline" className="text-[10px] shrink-0" style={{ color: border, borderColor: border + '44' }}>
+          {data.bienesCount} bienes
+        </Badge>
+      </div>
+    </div>
   );
 }
 
@@ -552,6 +645,7 @@ function GrupoNode({ data, id }: { data: any; id: string }) {
 
 const nodeTypes = {
   institucion: InstitucionNode,
+  edificioPanel: EdificioPanel,
   edificio: EdificioNode,
   responsable: ResponsableNode,
   dependencia: DependenciaNode,
@@ -570,6 +664,7 @@ function DiagramLegend({ show }: { show: boolean }) {
     { color: COLORS.responsable.bg, label: 'Responsable' },
     { color: COLORS.dependencia.bg, label: 'Dependencia' },
     { color: COLORS.grupo.bg, label: 'Grupo de Bienes' },
+    { color: '#1e40af18', label: 'Panel de Edificio', border: true },
   ];
   return (
     <div className="absolute bottom-4 left-4 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur rounded-lg shadow-lg border p-3">
@@ -577,7 +672,10 @@ function DiagramLegend({ show }: { show: boolean }) {
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
         {items.map(item => (
           <div key={item.label} className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm shrink-0" style={{ background: item.color }} />
+            <div className="w-3 h-3 rounded-sm shrink-0" style={{
+              background: item.border ? 'transparent' : item.color,
+              border: item.border ? `2px dashed #1e40af55` : 'none',
+            }} />
             <span className="text-[11px] text-foreground">{item.label}</span>
           </div>
         ))}
