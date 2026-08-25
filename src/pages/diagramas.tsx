@@ -389,12 +389,12 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  if (tree.length === 0) {
+if (tree.length === 0) {
     nodes.push({
-      id: 'institucion-roca',
+      id: 'institucion-ISMDDC',
       type: 'institucion',
       position: { x: 40, y: 0 },
-      data: { label: 'Instituto Roca', total: 0, bienesCount: 0 },
+      data: { label: 'Instituto ISMDDC', total: 0, bienesCount: 0 },
     });
     return { nodes, edges };
   }
@@ -419,103 +419,78 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
     currentX += dim.panelW + PANEL_GAP;
   }
 
-  // Create one Instituto node per edificio, centered above each panel
-  for (let i = 0; i < tree.length; i++) {
-    const ed = tree[i];
-    const dim = edificioDimensions[i];
-    const pos = panelPositions[i];
+  // Create one Instituto ISMDDC node, centered above both panels
+  const totalWidth = panelPositions.reduce((sum, p) => sum + p.w, 0) + PANEL_GAP;
+  const institucionX = 40 + totalWidth / 2 - NODE_W / 2;
 
-    const instLabel = `Instituto ${ed.data.label.replace('Edificio ', '')}`;
-    const instX = pos.x + dim.panelW / 2 - NODE_W / 2;
-    const instY = -NODE_H.institucion - 20;
+  nodes.push({
+    id: 'institucion-ISMDDC',
+    type: 'institucion',
+    position: { x: institucionX, y: -NODE_H.institucion - 24 },
+    data: { 
+      label: 'Instituto ISMDDC', 
+      total: dependencias.length, 
+      bienesCount: bienes.length,
+    },
+  });
 
-    nodes.push({
-      id: `institucion-${ed.id}`,
-      type: 'institucion',
-      position: { x: instX, y: instY },
-      data: { label: instLabel, total: ed.data.dependenciasCount, bienesCount: ed.data.bienesCount },
-    });
+  // Panel Area (izquierda) - always present
+  const areaPos = panelPositions[0];
+  nodes.push({
+    id: 'panel-area',
+    type: 'edificioPanel',
+    position: { x: areaPos.x, y: areaPos.y },
+    data: {
+      label: 'Edificio Area',
+      dependenciasCount: areaChildren?.length || 0,
+      responsablesCount: areaChildren?.length || 0,
+      panelW: areaPanelW,
+      panelH: areaPanelH,
+      modo: 'area',
+    },
+  });
 
-    // Panel node (background container)
-    nodes.push({
-      id: `panel-${ed.id}`,
-      type: 'edificioPanel',
-      position: { x: pos.x, y: pos.y },
-      data: {
-        label: ed.data.label,
-        responsablesCount: ed.data.responsablesCount,
-        dependenciasCount: ed.data.dependenciasCount,
-        bienesCount: ed.data.bienesCount,
-        panelW: dim.panelW,
-        panelH: dim.panelH,
-      },
-    });
+  // Edge from Instituto ISMDDC to Area panel
+  edges.push({
+    id: 'e-inst-area',
+    source: 'institucion-ISMDDC',
+    target: 'panel-area',
+    type: 'smoothstep',
+    animated: true,
+    style: { stroke: '#4f46e5', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#4f46e5', width: 12, height: 12 },
+  });
 
-    // Edge from Instituto to Panel
-    edges.push({
-      id: `e-inst-${ed.id}`,
-      source: `institucion-${ed.id}`,
-      target: `panel-${ed.id}`,
-      type: 'smoothstep',
-      animated: true,
-      style: { stroke: EDGE_COLORS['institucion-edificio'], strokeWidth: 2 },
-      markerEnd: { type: MarkerType.ArrowClosed, color: EDGE_COLORS['institucion-edificio'], width: 12, height: 12 },
-    });
+  // Panel Roca (derecha) - always present
+  const rocaPos = panelPositions[1];
+  nodes.push({
+    id: 'panel-roca',
+    type: 'edificioPanel',
+    position: { x: rocaPos.x, y: rocaPos.y },
+    data: {
+      label: 'Edificio Roca',
+      dependenciasCount: rocaChildren?.length || 0,
+      responsablesCount: rocaChildren?.length || 0,
+      panelW: rocaPanelW,
+      panelH: rocaPanelH,
+      modo: 'roca',
+    },
+  });
 
-    // Children (piso nodes) positioned inside the panel
-    if (ed.children.length > 0) {
-      const childHeights = ed.children.map(getSubtreeHeight);
+  // Edge from Instituto ISMDDC to Roca panel
+  edges.push({
+    id: 'e-inst-roca',
+    source: 'institucion-ISMDDC',
+    target: 'panel-roca',
+    type: 'smoothstep',
+    animated: true,
+    style: { stroke: '#4f46e5', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: '#4f46e5', width: 12, height: 12 },
+  });
 
-      // Dividir en dos columnas si hay más de PANEL_SPLIT_THRESHOLD pisos
-      // y el edificio es Area (o tiene muchos pisos). 
-      // La división: izq = pisos bajos, der = pisos altos
-      if (ed.children.length > PANEL_SPLIT_THRESHOLD) {
-        const midpoint = Math.ceil(ed.children.length / 2);
-        const leftChildren = ed.children.slice(0, midpoint);
-        const rightChildren = ed.children.slice(midpoint);
-        const leftHeights = childHeights.slice(0, midpoint);
-        const rightHeights = childHeights.slice(midpoint);
-
-        // Posicionar columna izquierda (empezando un poco abajo del header)
-        // X: pos.x + padding, Y: starting después del header + espacio
-        const leftStartY = pos.y + PANEL_HEADER_H + 8; // 8px después del header
-        let leftY = leftStartY;
-        for (let j = 0; j < leftChildren.length; j++) {
-          const child = leftChildren[j];
-          const childH = leftHeights[j];
-          const childCenter = leftY + childH / 2;
-          positionSubtree(child, pos.x + PANEL_PAD_X, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
-          leftY += childH + V_GAP + 4; // espaciado ligeramente mayor entre filas
-        }
-
-        // Posicionar columna derecha al lado izquierdo + ancho de nodo + gap interno
-        const rightStartY = pos.y + PANEL_HEADER_H + 8;
-        let rightY = rightStartY;
-        const rightX = pos.x + PANEL_PAD_X + NODE_W + H_GAP + COLUMN_INTERNAL_GAP;
-        for (let j = 0; j < rightChildren.length; j++) {
-          const child = rightChildren[j];
-          const childH = rightHeights[j];
-          const childCenter = rightY + childH / 2;
-          positionSubtree(child, rightX, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
-          rightY += childH + V_GAP + 4;
-        }
-      } else {
-        // Layout original de una sola columna
-        const totalChildH = childHeights.reduce((a, b) => a + b, 0) + (ed.children.length - 1) * V_GAP;
-        const subtreeStartY = pos.y + PANEL_HEADER_H + (PANEL_PAD_TOP - PANEL_HEADER_H) / 2;
-        let childY = subtreeStartY;
-
-        for (let j = 0; j < ed.children.length; j++) {
-          const child = ed.children[j];
-          const childH = childHeights[j];
-          const childCenter = childY + childH / 2;
-          positionSubtree(child, pos.x + PANEL_PAD_X, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
-          childY += childH + V_GAP;
-        }
-      }
-    }
-  }
-
+  // Eliminate the per-edificio loop that creates separate institutions
+  // (All panel and instituto logic above handles both buildings now)
+  // Return early - no need for the per-edificio loop
   return { nodes, edges };
 }
 
