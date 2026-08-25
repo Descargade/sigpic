@@ -57,7 +57,7 @@ const NODE_W = 260;
 const H_GAP = 100;
 const V_GAP = 20;
 
-const PANEL_HEADER_H = 64;
+const PANEL_HEADER_H = 72;
 const PANEL_PAD_X = 40;
 const PANEL_PAD_TOP = 60;
 const PANEL_PAD_BOTTOM = 30;
@@ -467,6 +467,8 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
       const childHeights = ed.children.map(getSubtreeHeight);
 
       // Dividir en dos columnas si hay más de PANEL_SPLIT_THRESHOLD pisos
+      // y el edificio es Area (o tiene muchos pisos). 
+      // La división: izq = pisos bajos, der = pisos altos
       if (ed.children.length > PANEL_SPLIT_THRESHOLD) {
         const midpoint = Math.ceil(ed.children.length / 2);
         const leftChildren = ed.children.slice(0, midpoint);
@@ -474,33 +476,28 @@ function computeLayout(dependencias: any[], bienes: any[]): { nodes: Node[]; edg
         const leftHeights = childHeights.slice(0, midpoint);
         const rightHeights = childHeights.slice(midpoint);
 
-        // Ancho de cada columna más gap interno
-        const colWidth = NODE_W + H_GAP;
-        const leftX = pos.x + PANEL_PAD_X;
-        const rightX = pos.x + PANEL_PAD_X + colWidth + COLUMN_INTERNAL_GAP;
-
-        // Altura total de cada columna
-        const totalLeftH = leftHeights.reduce((a, b) => a + b, 0) + (leftHeights.length - 1) * V_GAP;
-        const totalRightH = rightHeights.reduce((a, b) => a + b, 0) + (rightHeights.length - 1) * V_GAP;
-
         // Posicionar columna izquierda (empezando un poco abajo del header)
-        let leftY = pos.y + PANEL_HEADER_H + (PANEL_PAD_TOP - PANEL_HEADER_H) / 2;
+        // X: pos.x + padding, Y: starting después del header + espacio
+        const leftStartY = pos.y + PANEL_HEADER_H + 8; // 8px después del header
+        let leftY = leftStartY;
         for (let j = 0; j < leftChildren.length; j++) {
           const child = leftChildren[j];
           const childH = leftHeights[j];
           const childCenter = leftY + childH / 2;
-          positionSubtree(child, leftX, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
-          leftY += childH + V_GAP;
+          positionSubtree(child, pos.x + PANEL_PAD_X, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
+          leftY += childH + V_GAP + 4; // espaciado ligeramente mayor entre filas
         }
 
-        // Posicionar columna derecha
-        let rightY = pos.y + PANEL_HEADER_H + (PANEL_PAD_TOP - PANEL_HEADER_H) / 2;
+        // Posicionar columna derecha al lado izquierdo + ancho de nodo + gap interno
+        const rightStartY = pos.y + PANEL_HEADER_H + 8;
+        let rightY = rightStartY;
+        const rightX = pos.x + PANEL_PAD_X + NODE_W + H_GAP + COLUMN_INTERNAL_GAP;
         for (let j = 0; j < rightChildren.length; j++) {
           const child = rightChildren[j];
           const childH = rightHeights[j];
           const childCenter = rightY + childH / 2;
           positionSubtree(child, rightX, childCenter, nodes, edges, `panel-${ed.id}`, 'edificioPanel');
-          rightY += childH + V_GAP;
+          rightY += childH + V_GAP + 4;
         }
       } else {
         // Layout original de una sola columna
@@ -587,13 +584,13 @@ function EdificioPanel({ data }: { data: any }) {
       <div className="absolute inset-0 rounded-2xl pointer-events-none"
         style={{ background: bg, border: `4px solid ${border}` }} />
       <div className="absolute top-2 left-2 right-2 flex items-center gap-3 px-4 rounded-t-xl pointer-events-none"
-        style={{ height: PANEL_HEADER_H - 4, borderBottom: `2px solid ${border}55` }}>
+        style={{ height: PANEL_HEADER_H, borderBottom: `6px solid ${border}` }}>
         <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: border }}>
           <Building2 className="w-6 h-6 text-white" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-base font-bold truncate" style={{ color: border }}>{data.label}</div>
-          <div className="text-sm" style={{ color: border + 'aa' }}>
+          <div className="text-xs text-white/70 mt-1">
             {data.responsablesCount} responsables · {data.dependenciasCount} dependencias
           </div>
         </div>
