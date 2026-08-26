@@ -1173,7 +1173,7 @@ export default function Diagramas() {
 function DiagramaInstitucional({ showLegend, diagramKey, editMode, setEditMode }: {
   showLegend?: boolean; diagramKey: string; editMode: boolean; setEditMode: (v: boolean) => void;
 }) {
-  const { data: dependencias } = useListDependencias();
+  const { data: dependencias } = useListDependencias(); if (!dependencias || !dependencias.data) return null;
   const { data: bienes } = useListBienes({ soloRaiz: true });
   const { data: configuracion } = useListConfiguracion();
 
@@ -1228,7 +1228,7 @@ function DiagramaInstitucional({ showLegend, diagramKey, editMode, setEditMode }
 function DiagramaPatrimonial({ showLegend, diagramKey, editMode, setEditMode }: {
   showLegend?: boolean; diagramKey: string; editMode: boolean; setEditMode: (v: boolean) => void;
 }) {
-  const { data: dependencias } = useListDependencias();
+  const { data: dependencias } = useListDependencias(); if (!dependencias || !dependencias.data) return null;
   const { data: bienes } = useListBienes({});
 
   const { nodes: layoutNodes, edges: layoutEdges } = useMemo(() => {
