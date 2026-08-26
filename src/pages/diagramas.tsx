@@ -1179,12 +1179,33 @@ function DiagramaInstitucional({ showLegend, diagramKey, editMode, setEditMode }
 
   const instName = configuracion?.find((c: any) => c.clave === 'institucion.nombre')?.valor || 'Instituto';
 
-  const { nodes: layoutNodes, edges: layoutEdges } = useMemo(() => {
-    if (!dependencias || !bienes) return { nodes: [], edges: [] };
-    return computeLayout(dependencias, bienes);
-  }, [dependencias, bienes]);
+  // Manejo robusto de los datos
+  const dependenciasData = dependencias?.data || dependencias;
+  const bienesData = bienes?.data || bienes;
+  const hasData = !!dependenciasData && !!bienesData;
 
-  const isLoading = !dependencias || !bienes;
+  const { nodes: layoutNodes, edges: layoutEdges } = useMemo(() => {
+    if (!hasData) return { nodes: [], edges: [] };
+    return computeLayout(dependenciasData, bienesData);
+  }, [dependenciasData, bienesData]);
+
+  // Determinar estado de loading
+  const isLoading = !dependenciasData || !bienesData || layoutNodes.length === 0;
+
+  // Si aún no hay datos suficientes, mostrar skeleton
+  if (!hasData) {
+    return (
+      <div className="flex flex-col min-h-[600px]">
+        <div className="mb-2 flex items-center justify-between shrink-0">
+          <div>
+            <h2 className="text-lg font-bold">{instName} — Diagrama Organizacional</h2>
+            <p className="text-sm text-muted-foreground">Cargando datos institucionales...</p>
+          </div>
+        </div>
+        <Skeleton className="h-[600px] w-full rounded-xl" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col">
@@ -1193,7 +1214,7 @@ function DiagramaInstitucional({ showLegend, diagramKey, editMode, setEditMode }
           <h2 className="text-lg font-bold">{instName} — Diagrama Organizacional</h2>
           <p className="text-sm text-muted-foreground">Estructura institucional, edificios, responsables y dependencias.</p>
         </div>
-        <Badge variant="outline" className="text-xs">{dependencias?.length || 0} dependencias · {bienes?.length || 0} bienes</Badge>
+        <Badge variant="outline" className="text-xs">{dependenciasData.length || 0} dependencias · {bienesData.length || 0} bienes</Badge>
       </div>
       <DiagramWrapper
         initialNodes={layoutNodes} initialEdges={layoutEdges}
@@ -1204,11 +1225,6 @@ function DiagramaInstitucional({ showLegend, diagramKey, editMode, setEditMode }
     </div>
   );
 }
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   DIAGRAMA PATRIMONIAL
-   ═══════════════════════════════════════════════════════════════════════════ */
-
 function DiagramaPatrimonial({ showLegend, diagramKey, editMode, setEditMode }: {
   showLegend?: boolean; diagramKey: string; editMode: boolean; setEditMode: (v: boolean) => void;
 }) {
