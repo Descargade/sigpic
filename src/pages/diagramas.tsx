@@ -1301,6 +1301,7 @@ function DiagramaPatrimonial({ showLegend, diagramKey, editMode, setEditMode }: 
         isLoading={isLoading} bgClass="bg-gradient-to-br from-emerald-50/30 to-white dark:from-emerald-950/30 dark:to-gray-900"
         downloadLabel="diagrama-patrimonial" showLegend={showLegend}
         diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
+        wide
       />
     </div>
   );
@@ -1379,12 +1380,13 @@ function DiagramaTecnico({ showLegend, diagramKey, editMode, setEditMode }: {
         </div>
         <Badge variant="outline" className="text-xs">{bienes?.filter((b: any) => !b.parentId).length || 0} equipos</Badge>
       </div>
-      <DiagramWrapper
+<DiagramWrapper
         initialNodes={layoutNodes} initialEdges={layoutEdges}
         isLoading={isLoading} bgClass="bg-gradient-to-br from-cyan-50/30 to-white dark:from-cyan-950/30 dark:to-gray-900"
         downloadLabel="diagrama-tecnico" showLegend={showLegend}
         diagramKey={diagramKey} editMode={editMode} setEditMode={setEditMode}
-        />
+        wide
+      />
     </div>
   );
 }
